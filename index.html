@@ -1,0 +1,1989 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="default"/>
+<meta name="apple-mobile-web-app-title" content="Travel Life"/>
+<meta name="theme-color" content="#C23B6E"/>
+<title>Travel Life</title>
+<script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Helvetica Neue',sans-serif;background:#FAF6F2}</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel" data-presets="react">
+
+/* ═══════════════════════════════════════════════════════
+   DESIGN SYSTEM
+   Direction: High-fashion travel editorial × precision instrument
+   Palette: Deep rose ink + warm parchment + burnished gold + charcoal
+   Typography: Georgia serif headlines, system-ui body, tracked caps labels
+   Signature: Full-bleed masthead with italic serif logotype;
+              trip cards with diagonal color slash geometry
+═══════════════════════════════════════════════════════ */
+
+const T = {
+  // Parchment base — not white, not cream, distinctly warm
+  bg:          "#FAF6F2",
+  bgDeep:      "#F3EDE6",
+  surface:     "#FFFFFF",
+  surfaceWarm: "#FDF9F6",
+
+  // Deep rose — richer, more editorial than bubble-gum pink
+  rose:        "#C23B6E",
+  roseDark:    "#9A2D57",
+  roseDeep:    "#7A1E42",
+  rosePale:    "#F9EDF2",
+  roseMist:    "#F0D6E4",
+
+  // Gold — burnished, not yellow
+  gold:        "#B8892A",
+  goldLight:   "#F5EDD8",
+  goldPale:    "#FBF6EC",
+
+  // Type
+  ink:         "#1A0E14",      // near-black with rose undertone
+  inkMid:      "#5C3D4A",
+  inkLight:    "#9C7A88",
+  inkFaint:    "#C8A8B8",
+
+  // Utility
+  border:      "#E8D8E0",
+  borderFaint: "#F2E8EC",
+  success:     "#2D7A5C",
+  successPale: "#E8F4EF",
+  white:       "#FFFFFF",
+};
+
+const F = {
+  serif:  "Georgia, 'Times New Roman', serif",
+  sans:   "-apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', sans-serif",
+};
+
+const Sh = {
+  xs:  "0 1px 3px rgba(26,14,20,0.06)",
+  sm:  "0 2px 8px rgba(26,14,20,0.08)",
+  md:  "0 6px 20px rgba(26,14,20,0.1)",
+  lg:  "0 12px 40px rgba(26,14,20,0.14)",
+  rose:"0 4px 16px rgba(194,59,110,0.2)",
+};
+
+/* ─── Global CSS injected once ─────────────────────────── */
+const GLOBAL_CSS = `
+  @keyframes fadeUp { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+  @keyframes spin   { to { transform: rotate(360deg); } }
+  @keyframes shimmer{ 0%{background-position:-400px 0} 100%{background-position:400px 0} }
+  * { box-sizing: border-box; }
+  ::-webkit-scrollbar { width: 4px; height: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: ${T.roseMist}; border-radius: 2px; }
+  input:focus, textarea:focus, select:focus { outline: none; }
+`;
+
+/* ─── Micro SVG icons ──────────────────────────────────── */
+const Ico = ({ d, size = 16, color = "currentColor", sw = 1.7, fill = "none" }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill={fill} stroke={color}
+    strokeWidth={sw} strokeLinecap="round" strokeLinejoin="round"
+    style={{ display: "block", flexShrink: 0 }}>
+    <path d={d} />
+  </svg>
+);
+const D = {
+  plus:     "M12 5v14M5 12h14",
+  x:        "M18 6 6 18M6 6l12 12",
+  trash:    "M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2",
+  map:      "M3 6l6-3 6 3 6-3v15l-6 3-6-3-6 3V6z",
+  route:    "M3 17l6-6 4 4 8-10",
+  clock:    "M12 2a10 10 0 1 0 0 20A10 10 0 0 0 12 2zM12 6v6l4 2",
+  image:    "M21 15l-5-5L5 20M21 15V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-4zM8.5 8.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z",
+  edit:     "M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z",
+  camera:   "M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z",
+  check:    "M20 6 9 17l-5-5",
+  pin:      "M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0zM12 7a3 3 0 1 0 0 6 3 3 0 0 0 0-6z",
+  plane:    "M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z",
+  heart:    "M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z",
+  book:     "M4 19.5A2.5 2.5 0 0 1 6.5 17H20V2H6.5A2.5 2.5 0 0 0 4 4.5v15zM4 19.5A2.5 2.5 0 0 0 6.5 22H20v-5",
+  star:     "M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z",
+  globe:    "M12 2a10 10 0 1 0 0 20A10 10 0 0 0 12 2zM2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z",
+};
+
+/* ─── Label / eyebrow ──────────────────────────────────── */
+const Eyebrow = ({ children, style = {} }) => (
+  <div style={{ fontFamily: F.sans, fontSize: 10, fontWeight: 700, letterSpacing: "0.14em",
+    textTransform: "uppercase", color: T.inkLight, ...style }}>{children}</div>
+);
+
+/* ─── Divider ───────────────────────────────────────────── */
+const Rule = ({ style = {} }) => (
+  <div style={{ height: 1, background: T.border, ...style }} />
+);
+
+/* ─── Pill badge ────────────────────────────────────────── */
+const Pill = ({ children, bg = T.rosePale, color = T.rose, size = "sm" }) => (
+  <span style={{ background: bg, color, borderRadius: 100,
+    padding: size === "sm" ? "3px 10px" : "5px 14px",
+    fontSize: size === "sm" ? 11 : 12.5, fontWeight: 700, fontFamily: F.sans,
+    display: "inline-flex", alignItems: "center", gap: 4, letterSpacing: "0.02em" }}>
+    {children}
+  </span>
+);
+
+/* ─── Button ────────────────────────────────────────────── */
+const Btn = ({ children, onClick, variant = "primary", size = "md", style = {}, disabled = false }) => {
+  const vs = {
+    primary: { background: T.rose, color: T.white, border: "none", boxShadow: Sh.rose },
+    outline: { background: "transparent", color: T.rose, border: `1.5px solid ${T.rose}` },
+    ghost:   { background: T.rosePale, color: T.roseDark, border: "none" },
+    gold:    { background: T.gold, color: T.white, border: "none" },
+    danger:  { background: "#FFF0F2", color: "#C0303A", border: "none" },
+    ink:     { background: T.ink, color: T.white, border: "none" },
+    subtle:  { background: T.bgDeep, color: T.inkMid, border: "none" },
+  };
+  const ss = {
+    xs: { padding: "5px 12px", fontSize: 11.5, borderRadius: 8 },
+    sm: { padding: "7px 16px", fontSize: 12.5, borderRadius: 10 },
+    md: { padding: "10px 22px", fontSize: 13.5, borderRadius: 12 },
+    lg: { padding: "14px 28px", fontSize: 15, borderRadius: 14 },
+  };
+  return (
+    <button onClick={onClick} disabled={disabled} style={{
+      ...vs[variant], ...ss[size], fontWeight: 700, cursor: disabled ? "not-allowed" : "pointer",
+      display: "inline-flex", alignItems: "center", gap: 7, transition: "all 0.18s",
+      opacity: disabled ? 0.45 : 1, fontFamily: F.sans, ...style
+    }}>{children}</button>
+  );
+};
+
+/* ─── Input ─────────────────────────────────────────────── */
+const Inp = ({ label, value, onChange, type = "text", placeholder = "", note, style = {} }) => (
+  <div style={{ marginBottom: 16 }}>
+    {label && <Eyebrow style={{ marginBottom: 6 }}>{label}</Eyebrow>}
+    {note && <div style={{ fontSize: 12, color: T.inkLight, marginBottom: 6, lineHeight: 1.55 }}>{note}</div>}
+    <input type={type} value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder}
+      style={{ width: "100%", padding: "11px 14px", borderRadius: 11, border: `1.5px solid ${T.border}`,
+        fontSize: 14, color: T.ink, background: T.surface, fontFamily: F.sans,
+        transition: "border-color 0.15s", ...style }}
+      onFocus={e => e.target.style.borderColor = T.rose}
+      onBlur={e => e.target.style.borderColor = T.border} />
+  </div>
+);
+
+const Textarea = ({ label, value, onChange, placeholder = "", rows = 3 }) => (
+  <div style={{ marginBottom: 16 }}>
+    {label && <Eyebrow style={{ marginBottom: 6 }}>{label}</Eyebrow>}
+    <textarea value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder} rows={rows}
+      style={{ width: "100%", padding: "11px 14px", borderRadius: 11, border: `1.5px solid ${T.border}`,
+        fontSize: 14, color: T.ink, background: T.surface, resize: "vertical", fontFamily: F.sans }}
+      onFocus={e => e.target.style.borderColor = T.rose}
+      onBlur={e => e.target.style.borderColor = T.border} />
+  </div>
+);
+
+/* ─── Modal ─────────────────────────────────────────────── */
+const Modal = ({ open, onClose, title, children, width = 500 }) => {
+  if (!open) return null;
+  return (
+    <div onClick={e => e.target === e.currentTarget && onClose()}
+      style={{ position: "fixed", inset: 0, background: "rgba(26,14,20,0.55)", backdropFilter: "blur(6px)",
+        zIndex: 9000, display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}>
+      <div style={{ background: T.surface, borderRadius: 22, width: "100%", maxWidth: width,
+        maxHeight: "92vh", overflow: "auto", padding: "28px 26px", boxShadow: Sh.lg,
+        animation: "fadeUp 0.22s ease-out" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 22 }}>
+          <div style={{ fontFamily: F.serif, fontSize: 18, fontWeight: 700, color: T.ink, fontStyle: "italic" }}>{title}</div>
+          <button onClick={onClose} style={{ background: T.bgDeep, border: "none", borderRadius: 9,
+            padding: 8, cursor: "pointer", display: "flex", color: T.inkMid }}>
+            <Ico d={D.x} size={14} color={T.inkMid} />
+          </button>
+        </div>
+        {children}
+      </div>
+    </div>
+  );
+};
+
+/* ─── Empty state ───────────────────────────────────────── */
+const Empty = ({ emoji, text, sub }) => (
+  <div style={{ textAlign: "center", padding: "52px 20px" }}>
+    <div style={{ fontSize: 42, marginBottom: 14, opacity: 0.7 }}>{emoji}</div>
+    <div style={{ fontFamily: F.serif, fontSize: 16, fontStyle: "italic", color: T.inkMid, marginBottom: 6 }}>{text}</div>
+    {sub && <div style={{ fontSize: 12.5, color: T.inkLight, fontFamily: F.sans }}>{sub}</div>}
+  </div>
+);
+
+/* ─── Leaflet map ───────────────────────────────────────── */
+function RouteMap({ spots }) {
+  const elRef = useRef(null);
+  const mapRef = useRef(null);
+
+  const mount = useCallback((el) => {
+    if (!el) return;
+    const valid = spots.filter(s => s.lat && s.lng);
+    if (!valid.length) return;
+
+    const init = () => {
+      if (mapRef.current) { try { mapRef.current.remove(); } catch(e){} mapRef.current = null; }
+      const L = window.L;
+      const cx = valid.reduce((s, p) => s + p.lat, 0) / valid.length;
+      const cy = valid.reduce((s, p) => s + p.lng, 0) / valid.length;
+      const map = L.map(el).setView([cx, cy], 13);
+      mapRef.current = map;
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 19 }).addTo(map);
+      valid.forEach((spot, i) => {
+        const icon = L.divIcon({
+          html: `<div style="width:32px;height:32px;background:${T.rose};border-radius:50% 50% 50% 0;transform:rotate(-45deg);display:flex;align-items:center;justify-content:center;box-shadow:0 3px 12px rgba(194,59,110,0.5);border:2.5px solid white;">
+            <span style="transform:rotate(45deg);color:white;font-weight:800;font-size:12px;font-family:Georgia,serif;">${i + 1}</span></div>`,
+          iconSize: [32, 32], iconAnchor: [16, 32], className: ""
+        });
+        L.marker([spot.lat, spot.lng], { icon }).addTo(map)
+          .bindPopup(`<b style="font-family:Georgia,serif">${i + 1}. ${spot.name}</b>${spot.addr ? `<br/><span style="font-size:12px;color:#888">${spot.addr}</span>` : ""}${spot.stay ? `<br/>⏱ 停留 ${spot.stay} 分鐘` : ""}`);
+      });
+      if (valid.length > 1) {
+        L.polyline(valid.map(s => [s.lat, s.lng]), { color: T.rose, weight: 2.5, opacity: 0.8, dashArray: "10 7" }).addTo(map);
+        map.fitBounds(valid.map(s => [s.lat, s.lng]), { padding: [36, 36] });
+      }
+    };
+
+    if (window.L) { init(); return; }
+    if (!document.querySelector('link[href*="leaflet"]')) {
+      const lnk = document.createElement("link"); lnk.rel = "stylesheet";
+      lnk.href = "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css";
+      document.head.appendChild(lnk);
+    }
+    const scr = document.createElement("script");
+    scr.src = "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js";
+    scr.onload = init; document.head.appendChild(scr);
+  }, [JSON.stringify(spots.map(s => [s.lat, s.lng, s.name]))]);
+
+  return (
+    <div style={{ borderRadius: 16, overflow: "hidden", border: `1px solid ${T.border}`, boxShadow: Sh.sm, marginTop: 16 }}>
+      <div ref={mount} style={{ height: 310, width: "100%", background: T.bgDeep }} />
+    </div>
+  );
+}
+
+/* ─── AI route analysis ─────────────────────────────────── */
+function AIRoute({ spots, city, dayLabel }) {
+  const [res, setRes] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const run = async () => {
+    if (spots.length < 2 || loading) return;
+    setLoading(true); setRes("");
+    try {
+      const r = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ model: "claude-sonnet-4-6", max_tokens: 1000,
+          messages: [{ role: "user", content:
+            `我在${city}旅行，以下是${dayLabel}的景點（依加入順序）：\n${spots.map((s, i) => `${i + 1}. ${s.name}（${s.addr || ""}）停留${s.stay || 60}分鐘 座標:${s.lat},${s.lng}`).join("\n")}\n\n請分析：\n1. ✅ 路線是否有繞路？建議最優順序\n2. 🚶 各景點之間步行時間\n3. 🚇 地鐵/公車更省時的路段\n4. ⏰ 建議整天時間安排\n5. 💰 預估交通費\n\n用繁體中文、條列式、加 emoji 回答。` }] })
+      });
+      const data = await r.json();
+      setRes(data.content?.[0]?.text || "無法取得建議");
+    } catch { setRes("路線分析暫時無法使用，請稍後再試。"); }
+    setLoading(false);
+  };
+
+  return (
+    <div style={{ marginTop: 14 }}>
+      <Btn onClick={run} disabled={loading || spots.length < 2} variant="ink" style={{ width: "100%", justifyContent: "center" }}>
+        {loading
+          ? <><span style={{ display: "inline-block", animation: "spin 1s linear infinite" }}>⏳</span> AI 分析路線中…</>
+          : <><Ico d={D.route} size={14} color={T.white} /> AI 智慧路線規劃{spots.length < 2 ? "（需 2 個以上景點）" : ""}</>}
+      </Btn>
+      {res && (
+        <div style={{ marginTop: 14, background: T.goldPale, borderRadius: 14, padding: "16px 18px", border: `1px solid ${T.goldLight}` }}>
+          <Eyebrow style={{ color: T.gold, marginBottom: 10 }}>✦ AI 路線建議</Eyebrow>
+          <div style={{ fontSize: 13.5, lineHeight: 1.9, color: T.ink, whiteSpace: "pre-wrap", fontFamily: F.sans }}>{res}</div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ─── Expense constants ─────────────────────────────────── */
+const CATS = ["機票","住宿","美食","交通","購物","醫美","其他"];
+const CATE = { 機票:"✈️",住宿:"🏨",美食:"🍽️",交通:"🚆",購物:"🛍️",醫美:"💆",其他:"📌" };
+const CATC = { 機票:T.rose,住宿:T.gold,美食:"#D4533A",交通:"#2D7A5C",購物:"#7A5AC4",醫美:"#C45A7A",其他:T.inkLight };
+
+/* ══════════════════════════════════════════════════════════
+   GLOBAL SCAN MODAL  (accessible from anywhere in the app)
+══════════════════════════════════════════════════════════ */
+function GlobalScanModal({ open, onClose, trips, setTrips }) {
+  const scanRef = useRef(null);
+  const [scanImg, setScanImg] = useState(null);
+  const [scanB64, setScanB64] = useState(null);
+  const [scanLoad, setScanLoad] = useState(false);
+  const [scanItems, setScanItems] = useState([]);
+  const [scanStore, setScanStore] = useState("");
+  const [scanDate, setScanDate] = useState(new Date().toISOString().slice(0,10));
+  const [scanStep, setScanStep] = useState("upload"); // upload | confirm | done
+  const [targetTripId, setTargetTripId] = useState("");
+  const [manualExp, setManualExp] = useState({ cat:"美食", amount:"", note:"", date:new Date().toISOString().slice(0,10) });
+  const [mode, setMode] = useState("scan"); // scan | manual
+
+  const reset = () => {
+    setScanImg(null); setScanB64(null); setScanLoad(false);
+    setScanItems([]); setScanStore(""); setScanStep("upload");
+    setManualExp({ cat:"美食", amount:"", note:"", date:new Date().toISOString().slice(0,10) });
+    setMode("scan");
+  };
+
+  const handleFile = e => {
+    const file = e.target.files[0]; if (!file) return;
+    const rd = new FileReader();
+    rd.onload = ev => { setScanImg(ev.target.result); setScanB64(ev.target.result.split(",")[1]); setScanStep("upload"); setScanItems([]); };
+    rd.readAsDataURL(file);
+  };
+
+  const runScan = async () => {
+    if (!scanB64 || scanLoad) return;
+    setScanLoad(true); setScanItems([]); setScanStore(""); setScanDate(new Date().toISOString().slice(0,10));
+    try {
+      const r = await fetch("https://api.anthropic.com/v1/messages", {
+        method:"POST", headers:{"Content-Type":"application/json"},
+        body: JSON.stringify({ model:"claude-sonnet-4-6", max_tokens:1000,
+          messages:[{ role:"user", content:[
+            { type:"image", source:{ type:"base64", media_type:"image/jpeg", data:scanB64 } },
+            { type:"text", text:`辨識收據，回傳純JSON不加任何說明或markdown：{"store":"店名","date":"YYYY-MM-DD","currency":"JPY","category":"美食|購物|交通|住宿|醫美|機票|其他","items":[{"name":"品項","qty":1,"total":金額數字}],"total":總計數字}\n日期看不清填"${new Date().toISOString().slice(0,10)}"。金額統一用數字。` }
+          ]}]
+        })
+      });
+      const data = await r.json();
+      const txt = data.content?.[0]?.text || "{}";
+      const parsed = JSON.parse(txt.replace(/```json|```/g,"").trim());
+      setScanStore(parsed.store||"");
+      setScanDate(parsed.date||new Date().toISOString().slice(0,10));
+      setScanItems((parsed.items||[]).map((it,i)=>({ id:i, name:it.name, total:it.total||0, cat:parsed.category||"購物", include:true })));
+      setScanStep("confirm");
+    } catch { alert("辨識失敗，請重試"); }
+    setScanLoad(false);
+  };
+
+  const confirmAndSave = () => {
+    const tid = targetTripId || (trips[0]?.id);
+    if (!tid) { alert("請先新增一趟旅程"); return; }
+    if (mode === "manual") {
+      if (!manualExp.amount) return;
+      setTrips(ps => ps.map(t => t.id===tid ? { ...t,
+        expenses:[...(t.expenses||[]),{id:`e${Date.now()}`,cat:manualExp.cat,amount:+manualExp.amount,note:manualExp.note,date:manualExp.date}],
+        spent:(t.spent||0)+ +manualExp.amount } : t));
+    } else {
+      const toAdd = scanItems.filter(it=>it.include&&it.total>0);
+      toAdd.forEach(it => {
+        setTrips(ps => ps.map(t => t.id===tid ? { ...t,
+          expenses:[...(t.expenses||[]),{id:`e${Date.now()}${it.id}`,cat:it.cat,amount:it.total,note:`${scanStore?scanStore+"・":""}${it.name}`,date:scanDate}],
+          spent:(t.spent||0)+it.total } : t));
+      });
+    }
+    reset(); onClose();
+  };
+
+  if (!open) return null;
+
+  return (
+    <div onClick={e=>e.target===e.currentTarget&&(reset(),onClose())}
+      style={{ position:"fixed",inset:0,background:"rgba(26,14,20,0.6)",backdropFilter:"blur(8px)",zIndex:9000,display:"flex",alignItems:"flex-end",justifyContent:"center" }}>
+      <div style={{ background:T.surface,borderRadius:"24px 24px 0 0",width:"100%",maxWidth:680,maxHeight:"92vh",overflow:"auto",boxShadow:Sh.lg,animation:"fadeUp 0.28s ease-out" }}>
+
+        {/* Handle bar */}
+        <div style={{ display:"flex",justifyContent:"center",padding:"12px 0 0" }}>
+          <div style={{ width:40,height:4,borderRadius:2,background:T.border }}/>
+        </div>
+
+        <div style={{ padding:"16px 24px 32px" }}>
+          {/* Header */}
+          <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20 }}>
+            <div>
+              <div style={{ fontFamily:F.serif,fontSize:20,fontWeight:700,fontStyle:"italic",color:T.ink }}>快速記帳</div>
+              <div style={{ fontSize:12,color:T.inkLight,marginTop:2,fontFamily:F.sans }}>掃描收據或手動輸入花費</div>
+            </div>
+            <button onClick={()=>{reset();onClose();}} style={{ background:T.bgDeep,border:"none",borderRadius:10,padding:9,cursor:"pointer",display:"flex" }}>
+              <Ico d={D.x} size={16} color={T.inkMid}/>
+            </button>
+          </div>
+
+          {/* Mode toggle */}
+          <div style={{ display:"flex",background:T.bgDeep,borderRadius:12,padding:4,marginBottom:20,gap:4 }}>
+            {[{id:"scan",label:"📷 掃描收據"},{id:"manual",label:"✏️ 手動輸入"}].map(m=>(
+              <button key={m.id} onClick={()=>setMode(m.id)} style={{ flex:1,padding:"9px 0",borderRadius:9,border:"none",cursor:"pointer",fontFamily:F.sans,fontSize:13,fontWeight:700,
+                background:mode===m.id?T.surface:"transparent", color:mode===m.id?T.rose:T.inkLight,
+                boxShadow:mode===m.id?Sh.xs:"none" }}>{m.label}</button>
+            ))}
+          </div>
+
+          {/* Trip selector — always visible */}
+          {trips.length > 0 && (
+            <div style={{ marginBottom:18 }}>
+              <Eyebrow style={{ marginBottom:6 }}>記到哪趟旅程？</Eyebrow>
+              <div style={{ display:"flex",gap:8,overflowX:"auto",paddingBottom:4 }}>
+                {trips.map(t=>(
+                  <button key={t.id} onClick={()=>setTargetTripId(t.id)} style={{
+                    padding:"8px 16px",borderRadius:100,border:`1.5px solid ${(targetTripId||trips[0]?.id)===t.id?T.rose:T.border}`,
+                    background:(targetTripId||trips[0]?.id)===t.id?T.rosePale:"transparent",
+                    color:(targetTripId||trips[0]?.id)===t.id?T.rose:T.inkMid,
+                    fontWeight:700,fontSize:12.5,cursor:"pointer",flexShrink:0,fontFamily:F.sans,
+                    whiteSpace:"nowrap" }}>
+                    {t.flag||"🌍"} {t.city}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+          {trips.length === 0 && (
+            <div style={{ background:T.goldPale,borderRadius:12,padding:"12px 16px",marginBottom:18,fontSize:13,color:T.gold,fontFamily:F.sans,border:`1px solid ${T.goldLight}` }}>
+              ⚠️ 請先在「旅程」頁新增一趟旅程，才能記帳
+            </div>
+          )}
+
+          {/* ── SCAN mode ── */}
+          {mode==="scan" && (
+            <div>
+              <input ref={scanRef} type="file" accept="image/*" onChange={handleFile} style={{ display:"none" }}/>
+
+              {scanStep==="upload" && (
+                <div>
+                  <button onClick={()=>scanRef.current?.click()} style={{
+                    width:"100%",borderRadius:18,border:`2px dashed ${T.border}`,background:T.bgDeep,
+                    cursor:"pointer",padding:"36px 20px",display:"flex",flexDirection:"column",
+                    alignItems:"center",gap:12,fontFamily:F.sans,marginBottom:16 }}>
+                    <div style={{ width:56,height:56,borderRadius:"50%",background:T.rosePale,display:"flex",alignItems:"center",justifyContent:"center" }}>
+                      <Ico d={D.camera} size={26} color={T.rose}/>
+                    </div>
+                    <div>
+                      <div style={{ fontSize:15,fontWeight:700,color:T.rose,fontFamily:F.serif,fontStyle:"italic",marginBottom:4 }}>拍照或上傳收據</div>
+                      <div style={{ fontSize:12,color:T.inkLight }}>支援 JPG、PNG，拍照或截圖皆可</div>
+                    </div>
+                  </button>
+
+                  {scanImg && (
+                    <div>
+                      <div style={{ borderRadius:16,overflow:"hidden",border:`1px solid ${T.border}`,marginBottom:14,boxShadow:Sh.xs }}>
+                        <img src={scanImg} alt="receipt" style={{ width:"100%",maxHeight:220,objectFit:"contain",background:"#f8f8f8" }}/>
+                      </div>
+                      <Btn onClick={runScan} disabled={scanLoad} style={{ width:"100%",justifyContent:"center",fontSize:14 }} size="lg">
+                        {scanLoad
+                          ? <><span style={{ display:"inline-block",animation:"spin 1s linear infinite" }}>⏳</span> AI 辨識中，請稍候…</>
+                          : <>🤖 開始 AI 辨識收據</>}
+                      </Btn>
+                      {scanLoad && (
+                        <div style={{ marginTop:10,textAlign:"center",fontSize:12,color:T.inkLight,fontFamily:F.sans }}>
+                          AI 正在讀取收據內容，通常需要 5–10 秒…
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {scanStep==="confirm" && scanItems.length>0 && (
+                <div>
+                  {/* Store info */}
+                  <div style={{ background:T.bgDeep,borderRadius:14,padding:"13px 16px",marginBottom:16,display:"flex",justifyContent:"space-between",alignItems:"center" }}>
+                    <div>
+                      <div style={{ fontFamily:F.serif,fontSize:15,fontWeight:700,fontStyle:"italic",color:T.ink }}>{scanStore||"收據"}</div>
+                      <div style={{ fontSize:12,color:T.inkLight,marginTop:1,fontFamily:F.sans }}>{scanDate}</div>
+                    </div>
+                    <button onClick={()=>setScanStep("upload")} style={{ fontSize:12,color:T.rose,background:"none",border:"none",cursor:"pointer",fontWeight:700,fontFamily:F.sans }}>重新掃描</button>
+                  </div>
+
+                  <Eyebrow style={{ marginBottom:10 }}>確認明細 — 可取消勾選或修改金額</Eyebrow>
+                  <div style={{ display:"flex",flexDirection:"column",gap:8,marginBottom:16,maxHeight:240,overflowY:"auto" }}>
+                    {scanItems.map((item,i)=>(
+                      <div key={item.id} style={{ display:"flex",alignItems:"center",gap:10,background:item.include?T.surface:T.bgDeep,borderRadius:12,border:`1px solid ${item.include?T.border:T.borderFaint}`,padding:"11px 14px",transition:"all 0.15s" }}>
+                        <button onClick={()=>setScanItems(p=>p.map((it,j)=>j===i?{...it,include:!it.include}:it))} style={{ width:22,height:22,borderRadius:6,border:`2px solid ${item.include?T.rose:T.border}`,background:item.include?T.rose:"transparent",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0 }}>
+                          {item.include&&<Ico d={D.check} size={11} color={T.white}/>}
+                        </button>
+                        <div style={{ flex:1,minWidth:0 }}>
+                          <div style={{ fontSize:13.5,fontWeight:600,color:item.include?T.ink:T.inkLight,fontFamily:F.sans }}>{item.name}</div>
+                          <select value={item.cat} onChange={e=>setScanItems(p=>p.map((it,j)=>j===i?{...it,cat:e.target.value}:it))}
+                            style={{ marginTop:4,fontSize:11.5,padding:"3px 8px",borderRadius:7,border:`1px solid ${T.border}`,color:T.inkLight,background:T.surface,fontFamily:F.sans }}>
+                            {CATS.map(cat=><option key={cat}>{cat}</option>)}
+                          </select>
+                        </div>
+                        <div style={{ textAlign:"right",flexShrink:0 }}>
+                          <div style={{ fontFamily:F.serif,fontSize:14,fontWeight:700,color:item.include?T.ink:T.inkLight }}>¥{item.total.toLocaleString()}</div>
+                          <input type="number" value={item.total} onChange={e=>setScanItems(p=>p.map((it,j)=>j===i?{...it,total:+e.target.value}:it))}
+                            style={{ width:78,fontSize:11.5,padding:"3px 6px",borderRadius:7,border:`1px solid ${T.border}`,textAlign:"right",fontFamily:F.sans,marginTop:2,color:T.inkLight }}/>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  {/* Total bar */}
+                  <div style={{ background:T.ink,borderRadius:14,padding:"13px 18px",marginBottom:18,display:"flex",justifyContent:"space-between",alignItems:"center",color:T.white }}>
+                    <span style={{ fontSize:13,fontFamily:F.sans,fontWeight:600 }}>選取合計</span>
+                    <span style={{ fontFamily:F.serif,fontSize:22,fontWeight:700,fontStyle:"italic" }}>¥{scanItems.filter(i=>i.include).reduce((s,i)=>s+i.total,0).toLocaleString()}</span>
+                  </div>
+                  <Btn onClick={confirmAndSave} disabled={scanItems.filter(i=>i.include).length===0||trips.length===0} style={{ width:"100%",justifyContent:"center",fontSize:14 }} size="lg">
+                    ✓ 確認記帳 {scanItems.filter(i=>i.include).length} 筆
+                  </Btn>
+                </div>
+              )}
+
+              {scanStep==="confirm"&&scanItems.length===0&&(
+                <div style={{ textAlign:"center",padding:24 }}>
+                  <div style={{ fontSize:34,marginBottom:10 }}>🤔</div>
+                  <div style={{ fontFamily:F.serif,fontStyle:"italic",color:T.inkMid,marginBottom:12 }}>未能辨識出品項</div>
+                  <Btn variant="subtle" size="sm" onClick={()=>setScanStep("upload")}>← 重新上傳</Btn>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* ── MANUAL mode ── */}
+          {mode==="manual" && (
+            <div>
+              <div style={{ display:"flex",flexWrap:"wrap",gap:7,marginBottom:16 }}>
+                {CATS.map(cat=>(
+                  <button key={cat} onClick={()=>setManualExp(p=>({...p,cat}))} style={{
+                    padding:"7px 14px",borderRadius:100,cursor:"pointer",fontFamily:F.sans,fontSize:12.5,
+                    border:`1.5px solid ${manualExp.cat===cat?CATC[cat]:T.border}`,
+                    background:manualExp.cat===cat?CATC[cat]+"18":"transparent",
+                    color:manualExp.cat===cat?CATC[cat]:T.inkLight,fontWeight:manualExp.cat===cat?700:400 }}>
+                    {CATE[cat]} {cat}
+                  </button>
+                ))}
+              </div>
+              <Inp label="金額" value={manualExp.amount} onChange={v=>setManualExp(p=>({...p,amount:v}))} type="number" placeholder="3000"/>
+              <Inp label="備註" value={manualExp.note} onChange={v=>setManualExp(p=>({...p,note:v}))} placeholder="廣藏市場绿豆煎餅"/>
+              <Inp label="日期" value={manualExp.date} onChange={v=>setManualExp(p=>({...p,date:v}))} type="date"/>
+              <Btn onClick={confirmAndSave} disabled={!manualExp.amount||trips.length===0} style={{ width:"100%",justifyContent:"center",fontSize:14 }} size="lg">
+                ✓ 記帳
+              </Btn>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ══════════════════════════════════════════════════════════
+   TRIP DETAIL
+══════════════════════════════════════════════════════════ */
+function TripDetail({ trip, setTrips, onBack }) {
+  const [tab, setTab] = useState("plan");
+  const [dayIdx, setDayIdx] = useState(0);
+  const [showMap, setShowMap] = useState(false);
+  const [M, setM] = useState({ spot: false, exp: false, mem: false, scan: false });
+  const [spotF, setSpotF] = useState({ name:"",addr:"",lat:"",lng:"",stay:60,note:"",photos:[] });
+  const [expF, setExpF] = useState({ cat:"美食",amount:"",note:"",date:new Date().toISOString().slice(0,10) });
+  const [memF, setMemF] = useState({ title:"",text:"",emoji:"📸",date:new Date().toISOString().slice(0,10),photos:[] });
+  const fileRef = useRef(null);
+  const spotPhotoRef = useRef(null);
+  const scanRef = useRef(null);
+  const mo = k => setM(p => ({...p,[k]:true}));
+  const mc = k => setM(p => ({...p,[k]:false}));
+
+  // Receipt scan
+  const [scanImg, setScanImg] = useState(null);
+  const [scanB64, setScanB64] = useState(null);
+  const [scanLoad, setScanLoad] = useState(false);
+  const [scanItems, setScanItems] = useState([]);
+  const [scanStore, setScanStore] = useState("");
+  const [scanDate, setScanDate] = useState("");
+  const [scanStep, setScanStep] = useState("upload");
+
+  const handleScanFile = e => {
+    const file = e.target.files[0]; if (!file) return;
+    const rd = new FileReader();
+    rd.onload = ev => { setScanImg(ev.target.result); setScanB64(ev.target.result.split(",")[1]); setScanStep("upload"); setScanItems([]); };
+    rd.readAsDataURL(file);
+  };
+
+  const runScan = async () => {
+    if (!scanB64 || scanLoad) return;
+    setScanLoad(true); setScanItems([]); setScanStore(""); setScanDate("");
+    try {
+      const r = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ model: "claude-sonnet-4-6", max_tokens: 1000,
+          messages: [{ role: "user", content: [
+            { type: "image", source: { type: "base64", media_type: "image/jpeg", data: scanB64 } },
+            { type: "text", text: `辨識收據，回傳純JSON不加任何說明或markdown：{"store":"店名","date":"YYYY-MM-DD","currency":"JPY","category":"美食|購物|交通|住宿|醫美|機票|其他","items":[{"name":"品項","qty":1,"total":金額}],"total":總計}\n日期看不清填"${new Date().toISOString().slice(0,10)}"。金額用數字。` }
+          ]}] })
+      });
+      const data = await r.json();
+      const txt = data.content?.[0]?.text || "{}";
+      const parsed = JSON.parse(txt.replace(/```json|```/g,"").trim());
+      setScanStore(parsed.store || ""); setScanDate(parsed.date || new Date().toISOString().slice(0,10));
+      setScanItems((parsed.items||[]).map((it,i) => ({ id:i,name:it.name,total:it.total||0,cat:parsed.category||"購物",include:true,currency:parsed.currency||"JPY" })));
+      setScanStep("confirm");
+    } catch { alert("辨識失敗，請重試"); }
+    setScanLoad(false);
+  };
+
+  const confirmScan = () => {
+    scanItems.filter(it=>it.include&&it.total>0).forEach(it => {
+      upd(t => ({ ...t, expenses:[...(t.expenses||[]),{id:`e${Date.now()}${it.id}`,cat:it.cat,amount:it.total,note:`${scanStore?scanStore+"・":""}${it.name}`,date:scanDate}], spent:(t.spent||0)+it.total }));
+    });
+    mc("scan"); setScanImg(null); setScanB64(null); setScanItems([]); setScanStep("upload");
+  };
+
+  const upd = fn => setTrips(ps => ps.map(t => t.id === trip.id ? fn(t) : t));
+  const days = trip.days || [];
+  const day = days[dayIdx] || { spots:[] };
+  const spots = day.spots || [];
+
+  const addDay = () => upd(t => ({...t, days:[...t.days,{id:`d${Date.now()}`,label:`Day ${t.days.length+1}`,spots:[]}]}));
+  const delDay = i => { if(days.length<=1) return; upd(t=>({...t,days:t.days.filter((_,j)=>j!==i)})); if(dayIdx>=days.length-1) setDayIdx(Math.max(0,dayIdx-1)); };
+
+  const addSpot = () => {
+    if(!spotF.name) return;
+    upd(t=>({...t,days:t.days.map((d,i)=>i===dayIdx?{...d,spots:[...d.spots,{id:`s${Date.now()}`,...spotF,lat:spotF.lat?+spotF.lat:null,lng:spotF.lng?+spotF.lng:null,stay:+spotF.stay||60}]}:d)}));
+    mc("spot"); setSpotF({name:"",addr:"",lat:"",lng:"",stay:60,note:"",photos:[]});
+  };
+
+  const handleSpotPhotos = e => {
+    Array.from(e.target.files).forEach(file => {
+      const rd = new FileReader();
+      rd.onload = ev => setSpotF(p => ({ ...p, photos:[...(p.photos||[]), { id:`sp${Date.now()}${Math.random()}`, url:ev.target.result, name:file.name }] }));
+      rd.readAsDataURL(file);
+    });
+  };
+  const delSpot = id => upd(t=>({...t,days:t.days.map((d,i)=>i===dayIdx?{...d,spots:d.spots.filter(s=>s.id!==id)}:d)}));
+
+  const addExp = () => {
+    if(!expF.amount) return;
+    upd(t=>({...t,expenses:[...(t.expenses||[]),{id:`e${Date.now()}`,...expF,amount:+expF.amount}],spent:(t.spent||0)+ +expF.amount}));
+    mc("exp"); setExpF({cat:"美食",amount:"",note:"",date:new Date().toISOString().slice(0,10)});
+  };
+  const delExp = id => { const e=(trip.expenses||[]).find(x=>x.id===id); upd(t=>({...t,expenses:t.expenses.filter(x=>x.id!==id),spent:Math.max(0,(t.spent||0)-(e?.amount||0))})); };
+
+  const handlePhotos = e => Array.from(e.target.files).forEach(file=>{const rd=new FileReader();rd.onload=ev=>setMemF(p=>({...p,photos:[...p.photos,{id:`${Date.now()}${Math.random()}`,url:ev.target.result,name:file.name}]}));rd.readAsDataURL(file);});
+  const addMem = () => { if(!memF.title) return; upd(t=>({...t,memories:[...(t.memories||[]),{id:`m${Date.now()}`,...memF}]})); mc("mem"); setMemF({title:"",text:"",emoji:"📸",date:new Date().toISOString().slice(0,10),photos:[]}); };
+  const delMem = id => upd(t=>({...t,memories:(t.memories||[]).filter(m=>m.id!==id)}));
+
+  const tripDays = trip.start&&trip.end ? Math.round((new Date(trip.end)-new Date(trip.start))/86400000)+1 : 0;
+  const expenses = trip.expenses||[];
+  const memories = trip.memories||[];
+  const expByCat = CATS.map(cat=>({cat,total:expenses.filter(e=>e.cat===cat).reduce((s,e)=>s+e.amount,0)})).filter(x=>x.total>0);
+  const maxE = Math.max(...expByCat.map(x=>x.total),1);
+  const mapSpots = spots.filter(s=>s.lat&&s.lng);
+
+  const TABS = [
+    { id:"plan", label:"行程規劃" },
+    { id:"expense", label:"花費管理" },
+    { id:"memory", label:"旅行回憶" },
+  ];
+
+  return (
+    <div style={{ animation: "fadeUp 0.25s ease-out" }}>
+
+      {/* ── Trip Hero — editorial full-bleed card ── */}
+      <div style={{ borderRadius: 22, overflow: "hidden", marginBottom: 24, boxShadow: Sh.md, position: "relative" }}>
+        {/* Main colour field */}
+        <div style={{ background: `linear-gradient(140deg, ${T.roseDark} 0%, ${T.roseDeep} 55%, ${T.ink} 100%)`, padding: "20px 22px 0" }}>
+          <button onClick={onBack} style={{ background: "rgba(255,255,255,0.12)", border: "1px solid rgba(255,255,255,0.2)", borderRadius: 9, padding: "6px 14px", color: T.white, cursor: "pointer", fontSize: 12, fontWeight: 600, fontFamily: F.sans, marginBottom: 20, display: "flex", alignItems: "center", gap: 5 }}>
+            ← 返回
+          </button>
+          {/* Large flag + title */}
+          <div style={{ display: "flex", gap: 16, alignItems: "flex-end", paddingBottom: 20 }}>
+            <div style={{ fontSize: 64, lineHeight: 1, filter: "drop-shadow(0 4px 12px rgba(0,0,0,0.3))" }}>{trip.flag||"🌍"}</div>
+            <div>
+              <Eyebrow style={{ color: "rgba(255,255,255,0.55)", marginBottom: 5 }}>{trip.country}</Eyebrow>
+              <div style={{ fontFamily: F.serif, fontSize: 28, fontWeight: 700, color: T.white, fontStyle: "italic", lineHeight: 1.1 }}>{trip.city}</div>
+              <div style={{ fontSize: 12, color: "rgba(255,255,255,0.65)", marginTop: 6, fontFamily: F.sans }}>
+                {trip.start} — {trip.end}  ·  {tripDays} 天
+                {trip.companions?.length>0 && `  ·  ${trip.companions.join("、")}`}
+              </div>
+            </div>
+          </div>
+        </div>
+        {/* Budget strip — contrasting pale bar */}
+        <div style={{ background: T.surfaceWarm, display: "grid", gridTemplateColumns: "1fr 1fr 1fr", borderTop: `1px solid ${T.border}` }}>
+          {[{l:"旅遊預算",v:trip.budget||0},{l:"已花費",v:trip.spent||0},{l:"剩餘",v:Math.max(0,(trip.budget||0)-(trip.spent||0))}].map((s,i)=>(
+            <div key={s.l} style={{ padding: "14px 18px", borderRight: i<2?`1px solid ${T.border}`:"none" }}>
+              <Eyebrow style={{ marginBottom: 4 }}>{s.l}</Eyebrow>
+              <div style={{ fontFamily: F.serif, fontSize: 18, fontWeight: 700, color: i===1&&s.v>(trip.budget||0)*0.9?T.rose:T.ink }}>
+                ${s.v.toLocaleString()}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* ── Tab rail — understated horizontal rule style ── */}
+      <div style={{ display: "flex", borderBottom: `2px solid ${T.border}`, marginBottom: 24, gap: 0 }}>
+        {TABS.map(tb => (
+          <button key={tb.id} onClick={() => setTab(tb.id)} style={{
+            flex: 1, padding: "10px 4px 12px", border: "none", background: "transparent", cursor: "pointer",
+            fontFamily: F.sans, fontSize: 12.5, fontWeight: tab===tb.id ? 800 : 500,
+            color: tab===tb.id ? T.rose : T.inkLight,
+            borderBottom: `2px solid ${tab===tb.id ? T.rose : "transparent"}`,
+            marginBottom: -2, transition: "all 0.18s",
+            letterSpacing: tab===tb.id ? "0.01em" : 0,
+          }}>{tb.label}</button>
+        ))}
+      </div>
+
+      {/* ══ PLAN TAB ══ */}
+      {tab === "plan" && (
+        <div>
+          {/* Day pills */}
+          <div style={{ display: "flex", gap: 8, overflowX: "auto", paddingBottom: 6, marginBottom: 20 }}>
+            {days.map((d,i) => (
+              <div key={d.id} style={{ display:"flex",alignItems:"center",gap:2,flexShrink:0 }}>
+                <button onClick={() => setDayIdx(i)} style={{
+                  padding: "7px 18px", borderRadius: 100, border: "none", cursor: "pointer", fontFamily: F.sans,
+                  background: dayIdx===i ? T.ink : T.bgDeep,
+                  color: dayIdx===i ? T.white : T.inkMid, fontWeight: 700, fontSize: 12.5
+                }}>{d.label}</button>
+                {days.length>1 && <button onClick={()=>delDay(i)} style={{background:"none",border:"none",cursor:"pointer",padding:"2px 3px",opacity:0.5}}><Ico d={D.x} size={11} color={T.inkMid}/></button>}
+              </div>
+            ))}
+            <button onClick={addDay} style={{ padding:"7px 16px",borderRadius:100,border:`1.5px dashed ${T.border}`,background:"transparent",cursor:"pointer",color:T.inkLight,fontSize:12,flexShrink:0,fontFamily:F.sans }}>+ 新增天</button>
+          </div>
+
+          {/* Timeline */}
+          <div style={{ position:"relative", paddingLeft: 44, marginBottom: 20 }}>
+            {/* Vertical track */}
+            {spots.length > 1 && <div style={{ position:"absolute",left:15,top:16,bottom:16,width:2,background:`linear-gradient(${T.rose},${T.roseMist})` }} />}
+
+            {spots.map((spot,idx) => (
+              <div key={spot.id} style={{ position:"relative", marginBottom: idx<spots.length-1 ? 20 : 0 }}>
+                {/* Number bubble */}
+                <div style={{ position:"absolute",left:-44,top:14,width:30,height:30,borderRadius:"50%",
+                  background:T.rose,color:T.white,display:"flex",alignItems:"center",justifyContent:"center",
+                  fontSize:12,fontWeight:800,fontFamily:F.serif,boxShadow:Sh.rose }}>
+                  {idx+1}
+                </div>
+                {/* Spot card */}
+                <div style={{ background:T.surface,borderRadius:14,border:`1px solid ${T.border}`,
+                  overflow:"hidden", boxShadow:Sh.xs }}>
+                  {/* Photo strip — shows if spot has images */}
+                  {spot.photos?.length > 0 && (
+                    <div style={{ display:"grid", gridTemplateColumns: spot.photos.length === 1 ? "1fr" : spot.photos.length === 2 ? "1fr 1fr" : "2fr 1fr", gap:2, height: spot.photos.length === 1 ? 180 : 130 }}>
+                      {spot.photos.slice(0,3).map((ph, pi) => (
+                        <div key={ph.id} style={{ position:"relative", overflow:"hidden" }}>
+                          <img src={ph.url} alt="" style={{ width:"100%", height:"100%", objectFit:"cover", display:"block" }}/>
+                          {/* 3+ indicator */}
+                          {pi === 2 && spot.photos.length > 3 && (
+                            <div style={{ position:"absolute",inset:0,background:"rgba(26,14,20,0.55)",display:"flex",alignItems:"center",justifyContent:"center" }}>
+                              <span style={{ fontFamily:F.serif,fontSize:22,fontWeight:700,color:T.white,fontStyle:"italic" }}>+{spot.photos.length - 3}</span>
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  <div style={{ padding:"14px 16px" }}>
+                    <div style={{ display:"flex",justifyContent:"space-between",alignItems:"flex-start" }}>
+                      <div style={{ flex:1,minWidth:0 }}>
+                        <div style={{ fontFamily:F.serif,fontSize:15,fontWeight:700,color:T.ink,fontStyle:"italic",marginBottom:3 }}>{spot.name}</div>
+                        {spot.addr && <div style={{ fontSize:12,color:T.inkLight,fontFamily:F.sans }}>📍 {spot.addr}</div>}
+                        <div style={{ display:"flex",gap:6,marginTop:8,flexWrap:"wrap" }}>
+                          <Pill><Ico d={D.clock} size={10} color={T.rose}/> {spot.stay} 分鐘</Pill>
+                          {spot.lat&&spot.lng && <Pill bg={T.goldPale} color={T.gold}>📌 座標已設定</Pill>}
+                          {spot.photos?.length > 0 && <Pill bg={T.bgDeep} color={T.inkMid}>🖼 {spot.photos.length} 張照片</Pill>}
+                        </div>
+                        {spot.note && <div style={{ fontSize:12,color:T.inkLight,marginTop:7,fontStyle:"italic",lineHeight:1.6 }}>"{spot.note}"</div>}
+                      </div>
+                      <button onClick={()=>delSpot(spot.id)} style={{ background:"none",border:"none",cursor:"pointer",padding:6,opacity:0.45 }}>
+                        <Ico d={D.trash} size={14} color={T.inkMid}/>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+            {spots.length===0 && <div style={{ paddingLeft:0 }}><Empty emoji="📍" text="尚未加入景點" sub="新增第一個景點，開始規劃行程"/></div>}
+          </div>
+
+          <div style={{ display:"flex",gap:10 }}>
+            <Btn variant="ghost" onClick={()=>mo("spot")} style={{ flex:1,justifyContent:"center" }}>
+              <Ico d={D.plus} size={14} color={T.rose}/> 新增景點
+            </Btn>
+            {mapSpots.length>=1 && (
+              <Btn variant="subtle" onClick={()=>setShowMap(v=>!v)} style={{ flex:1,justifyContent:"center" }}>
+                <Ico d={D.map} size={14} color={T.inkMid}/> {showMap?"收合地圖":"查看地圖"}
+              </Btn>
+            )}
+          </div>
+
+          {showMap && mapSpots.length>=1 && (
+            <div>
+              <RouteMap spots={mapSpots}/>
+              <AIRoute spots={spots} city={trip.city} dayLabel={day.label}/>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ══ EXPENSE TAB ══ */}
+      {tab === "expense" && (
+        <div>
+          {/* Big number header */}
+          <div style={{ display:"flex",justifyContent:"space-between",alignItems:"flex-end",marginBottom:20,paddingBottom:20,borderBottom:`1px solid ${T.border}` }}>
+            <div>
+              <Eyebrow style={{ marginBottom:6 }}>本次旅行總花費</Eyebrow>
+              <div style={{ fontFamily:F.serif,fontSize:38,fontWeight:700,color:T.ink,fontStyle:"italic",lineHeight:1 }}>
+                ${(trip.spent||0).toLocaleString()}
+              </div>
+              <div style={{ fontSize:12,color:T.inkLight,marginTop:4,fontFamily:F.sans }}>
+                共 {expenses.length} 筆記錄
+              </div>
+            </div>
+            <div style={{ display:"flex",flexDirection:"column",gap:8,alignItems:"flex-end" }}>
+              <Btn size="sm" variant="outline" onClick={()=>{setScanStep("upload");setScanImg(null);setScanB64(null);setScanItems([]);mo("scan");}}>
+                <Ico d={D.camera} size={13} color={T.rose}/> 掃描收據
+              </Btn>
+              <Btn size="sm" onClick={()=>mo("exp")}>
+                <Ico d={D.plus} size={13} color={T.white}/> 手動新增
+              </Btn>
+            </div>
+          </div>
+
+          {/* Category bars */}
+          {expByCat.length>0 && (
+            <div style={{ background:T.surfaceWarm,borderRadius:16,padding:"18px 20px",marginBottom:20,border:`1px solid ${T.border}` }}>
+              <Eyebrow style={{ marginBottom:14 }}>花費分佈</Eyebrow>
+              {expByCat.map(x=>(
+                <div key={x.cat} style={{ marginBottom:12 }}>
+                  <div style={{ display:"flex",justifyContent:"space-between",marginBottom:5,alignItems:"center" }}>
+                    <span style={{ fontSize:13,fontFamily:F.sans,color:T.inkMid }}>{CATE[x.cat]} {x.cat}</span>
+                    <span style={{ fontSize:13,fontWeight:700,color:T.ink,fontFamily:F.sans }}>${x.total.toLocaleString()}</span>
+                  </div>
+                  <div style={{ height:5,background:T.bgDeep,borderRadius:3 }}>
+                    <div style={{ height:"100%",width:`${x.total/maxE*100}%`,background:CATC[x.cat],borderRadius:3,transition:"width 0.6s ease" }}/>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Expense list */}
+          <div style={{ display:"flex",flexDirection:"column",gap:1 }}>
+            {expenses.map((e,i)=>(
+              <div key={e.id}>
+                <div style={{ display:"flex",alignItems:"center",gap:14,padding:"14px 4px" }}>
+                  <div style={{ width:40,height:40,borderRadius:12,background:CATC[e.cat]+"18",
+                    display:"flex",alignItems:"center",justifyContent:"center",fontSize:18,flexShrink:0 }}>{CATE[e.cat]}</div>
+                  <div style={{ flex:1 }}>
+                    <div style={{ fontSize:14,fontWeight:600,color:T.ink,fontFamily:F.sans }}>{e.note||e.cat}</div>
+                    <div style={{ fontSize:11.5,color:T.inkLight,marginTop:1,fontFamily:F.sans }}>{e.date} · {e.cat}</div>
+                  </div>
+                  <div style={{ fontFamily:F.serif,fontSize:16,fontWeight:700,color:T.ink,fontStyle:"italic" }}>${e.amount.toLocaleString()}</div>
+                  <button onClick={()=>delExp(e.id)} style={{ background:"none",border:"none",cursor:"pointer",opacity:0.4,padding:4 }}><Ico d={D.trash} size={13} color={T.inkMid}/></button>
+                </div>
+                {i<expenses.length-1 && <Rule/>}
+              </div>
+            ))}
+            {expenses.length===0 && <Empty emoji="💳" text="尚無花費紀錄" sub="掃描收據或手動新增第一筆"/>}
+          </div>
+        </div>
+      )}
+
+      {/* ══ MEMORY TAB ══ */}
+      {tab === "memory" && (
+        <div>
+          <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20 }}>
+            <div style={{ fontFamily:F.serif,fontSize:20,fontStyle:"italic",color:T.ink }}>旅行回憶</div>
+            <Btn size="sm" onClick={()=>mo("mem")}><Ico d={D.plus} size={13} color={T.white}/> 新增</Btn>
+          </div>
+          <div style={{ display:"flex",flexDirection:"column",gap:16 }}>
+            {memories.map(m=>(
+              <div key={m.id} style={{ background:T.surface,borderRadius:18,border:`1px solid ${T.border}`,overflow:"hidden",boxShadow:Sh.xs }}>
+                {/* Colour tag stripe */}
+                <div style={{ height:5,background:`linear-gradient(90deg,${T.rose},${T.gold})` }}/>
+                <div style={{ padding:"16px 18px" }}>
+                  <div style={{ display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:10 }}>
+                    <div style={{ display:"flex",gap:10,alignItems:"center" }}>
+                      <span style={{ fontSize:26 }}>{m.emoji}</span>
+                      <div>
+                        <div style={{ fontFamily:F.serif,fontSize:15,fontWeight:700,fontStyle:"italic",color:T.ink }}>{m.title}</div>
+                        <div style={{ fontSize:11,color:T.inkFaint,marginTop:1,fontFamily:F.sans }}>{m.date}</div>
+                      </div>
+                    </div>
+                    <button onClick={()=>delMem(m.id)} style={{ background:"none",border:"none",cursor:"pointer",opacity:0.35,padding:4 }}><Ico d={D.trash} size={13} color={T.inkMid}/></button>
+                  </div>
+                  {m.text && <div style={{ fontSize:13.5,lineHeight:1.8,color:T.inkMid,fontFamily:F.sans,marginBottom:m.photos?.length>0?12:0 }}>{m.text}</div>}
+                  {m.photos?.length>0 && (
+                    <div style={{ display:"grid",gridTemplateColumns:m.photos.length===1?"1fr":"1fr 1fr",gap:8,marginTop:10 }}>
+                      {m.photos.map(ph=>(
+                        <img key={ph.id} src={ph.url} alt="" style={{ width:"100%",borderRadius:10,objectFit:"cover",maxHeight:m.photos.length===1?240:150 }}/>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))}
+            {memories.length===0 && <Empty emoji="🌸" text="還沒有回憶" sub="為這趟旅程留下美好紀錄"/>}
+          </div>
+        </div>
+      )}
+
+      {/* ── Modals ── */}
+      <Modal open={M.spot} onClose={()=>{mc("spot");setSpotF({name:"",addr:"",lat:"",lng:"",stay:60,note:"",photos:[]});}} title="新增景點">
+        <Inp label="景點名稱 *" value={spotF.name} onChange={v=>setSpotF(p=>({...p,name:v}))} placeholder="廣藏市場"/>
+        <Inp label="地址" value={spotF.addr} onChange={v=>setSpotF(p=>({...p,addr:v}))} placeholder="禮智洞，鐘路區"/>
+        <div style={{ display:"grid",gridTemplateColumns:"1fr 1fr",gap:"0 10px" }}>
+          <Inp label="Lat 緯度" value={spotF.lat} onChange={v=>setSpotF(p=>({...p,lat:v}))} placeholder="37.5700" note="填入座標才能顯示地圖路線"/>
+          <Inp label="Lng 經度" value={spotF.lng} onChange={v=>setSpotF(p=>({...p,lng:v}))} placeholder="126.9997"/>
+        </div>
+        <Inp label="預計停留（分鐘）" value={spotF.stay} onChange={v=>setSpotF(p=>({...p,stay:v}))} type="number" placeholder="90"/>
+        <Textarea label="備註" value={spotF.note} onChange={v=>setSpotF(p=>({...p,note:v}))} placeholder="開放時間、注意事項…" rows={2}/>
+
+        {/* Photo upload */}
+        <div style={{ marginBottom:16 }}>
+          <Eyebrow style={{ marginBottom:8 }}>景點照片</Eyebrow>
+          <input ref={spotPhotoRef} type="file" accept="image/*" multiple onChange={handleSpotPhotos} style={{ display:"none" }}/>
+
+          {spotF.photos?.length > 0 ? (
+            <div>
+              {/* Preview grid */}
+              <div style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:6, marginBottom:8 }}>
+                {spotF.photos.map((ph,i) => (
+                  <div key={ph.id} style={{ position:"relative", borderRadius:10, overflow:"hidden" }}>
+                    <img src={ph.url} alt="" style={{ width:"100%", height:80, objectFit:"cover", display:"block" }}/>
+                    <button onClick={()=>setSpotF(f=>({...f,photos:f.photos.filter((_,j)=>j!==i)}))}
+                      style={{ position:"absolute",top:4,right:4,background:"rgba(26,14,20,0.65)",border:"none",borderRadius:6,padding:3,cursor:"pointer",display:"flex" }}>
+                      <Ico d={D.x} size={10} color={T.white}/>
+                    </button>
+                  </div>
+                ))}
+                {/* Add more tile */}
+                <button onClick={()=>spotPhotoRef.current?.click()} style={{ height:80,borderRadius:10,border:`1.5px dashed ${T.border}`,background:T.bgDeep,cursor:"pointer",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:4,color:T.inkFaint }}>
+                  <Ico d={D.plus} size={16} color={T.inkFaint}/>
+                  <span style={{ fontSize:10,fontFamily:F.sans }}>新增</span>
+                </button>
+              </div>
+              <div style={{ fontSize:11.5,color:T.inkLight,fontFamily:F.sans }}>已上傳 {spotF.photos.length} 張照片</div>
+            </div>
+          ) : (
+            <button onClick={()=>spotPhotoRef.current?.click()} style={{
+              width:"100%", padding:"20px 16px", borderRadius:14, border:`1.5px dashed ${T.border}`,
+              background:T.bgDeep, cursor:"pointer", display:"flex", alignItems:"center",
+              justifyContent:"center", gap:10, fontFamily:F.sans }}>
+              <div style={{ width:38,height:38,borderRadius:"50%",background:T.rosePale,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0 }}>
+                <Ico d={D.image} size={18} color={T.rose}/>
+              </div>
+              <div style={{ textAlign:"left" }}>
+                <div style={{ fontSize:13.5,fontWeight:700,color:T.inkMid }}>上傳景點照片</div>
+                <div style={{ fontSize:11.5,color:T.inkFaint,marginTop:2 }}>可多選，JPG / PNG 皆可</div>
+              </div>
+            </button>
+          )}
+        </div>
+
+        <div style={{ display:"flex",gap:10,justifyContent:"flex-end" }}>
+          <Btn variant="subtle" size="sm" onClick={()=>{mc("spot");setSpotF({name:"",addr:"",lat:"",lng:"",stay:60,note:"",photos:[]});}}>取消</Btn>
+          <Btn size="sm" onClick={addSpot} disabled={!spotF.name}>加入景點</Btn>
+        </div>
+      </Modal>
+
+      <Modal open={M.exp} onClose={()=>mc("exp")} title="新增花費">
+        <div style={{ display:"flex",flexWrap:"wrap",gap:7,marginBottom:18 }}>
+          {CATS.map(cat=>(
+            <button key={cat} onClick={()=>setExpF(p=>({...p,cat}))} style={{
+              padding:"7px 14px",borderRadius:100,cursor:"pointer",fontFamily:F.sans,fontSize:12.5,
+              border:`1.5px solid ${expF.cat===cat?CATC[cat]:T.border}`,
+              background:expF.cat===cat?CATC[cat]+"15":"transparent",
+              color:expF.cat===cat?CATC[cat]:T.inkLight,fontWeight:expF.cat===cat?700:400 }}>
+              {CATE[cat]} {cat}
+            </button>
+          ))}
+        </div>
+        <Inp label="金額 NT$" value={expF.amount} onChange={v=>setExpF(p=>({...p,amount:v}))} type="number" placeholder="3000"/>
+        <Inp label="備註" value={expF.note} onChange={v=>setExpF(p=>({...p,note:v}))} placeholder="明洞購物"/>
+        <Inp label="日期" value={expF.date} onChange={v=>setExpF(p=>({...p,date:v}))} type="date"/>
+        <div style={{ display:"flex",gap:10,justifyContent:"flex-end" }}>
+          <Btn variant="subtle" size="sm" onClick={()=>mc("exp")}>取消</Btn>
+          <Btn size="sm" onClick={addExp} disabled={!expF.amount}>新增</Btn>
+        </div>
+      </Modal>
+
+      <Modal open={M.mem} onClose={()=>{mc("mem");setMemF({title:"",text:"",emoji:"📸",date:new Date().toISOString().slice(0,10),photos:[]});}} title="新增旅行回憶">
+        <div style={{ display:"grid",gridTemplateColumns:"4fr 1fr",gap:"0 10px" }}>
+          <Inp label="標題 *" value={memF.title} onChange={v=>setMemF(p=>({...p,title:v}))} placeholder="廣藏市場初體驗"/>
+          <Inp label="Emoji" value={memF.emoji} onChange={v=>setMemF(p=>({...p,emoji:v}))}/>
+        </div>
+        <Textarea label="心得" value={memF.text} onChange={v=>setMemF(p=>({...p,text:v}))} placeholder="寫下這段旅程的美好記憶…" rows={4}/>
+        <Inp label="日期" value={memF.date} onChange={v=>setMemF(p=>({...p,date:v}))} type="date"/>
+        <div style={{ marginBottom:16 }}>
+          <Eyebrow style={{ marginBottom:8 }}>照片</Eyebrow>
+          <input ref={fileRef} type="file" accept="image/*" multiple onChange={handlePhotos} style={{ display:"none" }}/>
+          <button onClick={()=>fileRef.current?.click()} style={{ width:"100%",padding:16,borderRadius:14,border:`1.5px dashed ${T.border}`,background:T.bgDeep,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:8,color:T.inkLight,fontWeight:600,fontSize:13.5,fontFamily:F.sans }}>
+            <Ico d={D.image} size={17} color={T.inkLight}/> 點選上傳照片
+          </button>
+          {memF.photos.length>0 && (
+            <div style={{ display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:7,marginTop:10 }}>
+              {memF.photos.map((ph,i)=>(
+                <div key={ph.id} style={{ position:"relative" }}>
+                  <img src={ph.url} alt="" style={{ width:"100%",height:80,objectFit:"cover",borderRadius:10 }}/>
+                  <button onClick={()=>setMemF(f=>({...f,photos:f.photos.filter((_,j)=>j!==i)}))} style={{ position:"absolute",top:4,right:4,background:"rgba(0,0,0,0.6)",border:"none",borderRadius:5,padding:3,cursor:"pointer",display:"flex" }}>
+                    <Ico d={D.x} size={9} color="#fff"/>
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+        <div style={{ display:"flex",gap:10,justifyContent:"flex-end" }}>
+          <Btn variant="subtle" size="sm" onClick={()=>{mc("mem");setMemF({title:"",text:"",emoji:"📸",date:new Date().toISOString().slice(0,10),photos:[]});}}>取消</Btn>
+          <Btn size="sm" onClick={addMem} disabled={!memF.title}>儲存回憶</Btn>
+        </div>
+      </Modal>
+
+      {/* Scan receipt modal */}
+      <Modal open={M.scan} onClose={()=>{mc("scan");setScanImg(null);setScanB64(null);setScanItems([]);setScanStep("upload");}} title="掃描收據自動記帳" width={540}>
+        <input ref={scanRef} type="file" accept="image/*" onChange={handleScanFile} style={{ display:"none" }}/>
+        {scanStep==="upload" && (
+          <div>
+            <button onClick={()=>scanRef.current?.click()} style={{ width:"100%",borderRadius:16,border:`2px dashed ${T.border}`,background:T.bgDeep,cursor:"pointer",padding:"32px 20px",display:"flex",flexDirection:"column",alignItems:"center",gap:10,fontFamily:F.sans,marginBottom:16 }}>
+              <div style={{ fontSize:38 }}>📷</div>
+              <div style={{ fontSize:14,fontWeight:700,color:T.rose,fontFamily:F.serif,fontStyle:"italic" }}>上傳收據照片</div>
+              <div style={{ fontSize:12,color:T.inkLight }}>支援 JPG、PNG，拍照或截圖皆可</div>
+            </button>
+            {scanImg && (
+              <div>
+                <div style={{ borderRadius:14,overflow:"hidden",border:`1px solid ${T.border}`,marginBottom:14 }}>
+                  <img src={scanImg} alt="receipt" style={{ width:"100%",maxHeight:260,objectFit:"contain",background:"#f5f5f5" }}/>
+                </div>
+                <Btn onClick={runScan} disabled={scanLoad} style={{ width:"100%",justifyContent:"center" }}>
+                  {scanLoad?<><span style={{ display:"inline-block",animation:"spin 1s linear infinite" }}>⏳</span> AI 辨識中…</>:<>🤖 開始辨識收據</>}
+                </Btn>
+                {scanLoad && <div style={{ marginTop:12,textAlign:"center",fontSize:12.5,color:T.inkLight,fontFamily:F.sans }}>AI 正在辨識收據內容，請稍候…</div>}
+              </div>
+            )}
+          </div>
+        )}
+        {scanStep==="confirm" && scanItems.length>0 && (
+          <div>
+            <div style={{ background:T.bgDeep,borderRadius:14,padding:"14px 18px",marginBottom:18,display:"flex",justifyContent:"space-between",alignItems:"center" }}>
+              <div>
+                <div style={{ fontFamily:F.serif,fontSize:15,fontWeight:700,fontStyle:"italic",color:T.ink }}>{scanStore||"收據"}</div>
+                <div style={{ fontSize:12,color:T.inkLight,marginTop:2 }}>{scanDate}</div>
+              </div>
+              <Pill bg={T.rosePale} color={T.rose}>{scanItems.filter(i=>i.include).length} 筆已選取</Pill>
+            </div>
+            <div style={{ display:"flex",flexDirection:"column",gap:8,marginBottom:18,maxHeight:280,overflowY:"auto" }}>
+              {scanItems.map((item,i)=>(
+                <div key={item.id} style={{ display:"flex",alignItems:"center",gap:10,background:item.include?T.surface:T.bgDeep,borderRadius:12,border:`1px solid ${item.include?T.border:T.borderFaint}`,padding:"12px 14px" }}>
+                  <button onClick={()=>setScanItems(p=>p.map((it,j)=>j===i?{...it,include:!it.include}:it))} style={{ width:22,height:22,borderRadius:6,border:`2px solid ${item.include?T.rose:T.border}`,background:item.include?T.rose:"transparent",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0 }}>
+                    {item.include && <Ico d={D.check} size={11} color={T.white}/>}
+                  </button>
+                  <div style={{ width:22,height:22,borderRadius:"50%",background:T.rosePale,color:T.rose,display:"flex",alignItems:"center",justifyContent:"center",fontSize:11,fontWeight:800,flexShrink:0,fontFamily:F.serif }}>{i+1}</div>
+                  <div style={{ flex:1,minWidth:0 }}>
+                    <div style={{ fontSize:13.5,fontWeight:600,color:item.include?T.ink:T.inkLight,fontFamily:F.sans }}>{item.name}</div>
+                    <select value={item.cat} onChange={e=>setScanItems(p=>p.map((it,j)=>j===i?{...it,cat:e.target.value}:it))} style={{ marginTop:4,fontSize:11.5,padding:"3px 8px",borderRadius:7,border:`1px solid ${T.border}`,color:T.inkLight,background:T.surface,fontFamily:F.sans }}>
+                      {CATS.map(cat=><option key={cat}>{cat}</option>)}
+                    </select>
+                  </div>
+                  <div style={{ textAlign:"right",flexShrink:0 }}>
+                    <div style={{ fontFamily:F.serif,fontSize:14,fontWeight:700,color:item.include?T.ink:T.inkLight }}>¥{item.total.toLocaleString()}</div>
+                    <input type="number" value={item.total} onChange={e=>setScanItems(p=>p.map((it,j)=>j===i?{...it,total:+e.target.value}:it))} style={{ width:80,fontSize:11.5,padding:"3px 6px",borderRadius:7,border:`1px solid ${T.border}`,textAlign:"right",fontFamily:F.sans,marginTop:2,color:T.inkLight }}/>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div style={{ background:T.ink,borderRadius:14,padding:"14px 18px",marginBottom:18,display:"flex",justifyContent:"space-between",alignItems:"center",color:T.white }}>
+              <span style={{ fontFamily:F.sans,fontSize:13,fontWeight:600 }}>選取合計</span>
+              <span style={{ fontFamily:F.serif,fontSize:22,fontWeight:700,fontStyle:"italic" }}>¥{scanItems.filter(i=>i.include).reduce((s,i)=>s+i.total,0).toLocaleString()}</span>
+            </div>
+            <div style={{ display:"flex",gap:10 }}>
+              <Btn variant="subtle" size="sm" onClick={()=>setScanStep("upload")} style={{ flex:1,justifyContent:"center" }}>← 重新掃描</Btn>
+              <Btn size="sm" onClick={confirmScan} disabled={scanItems.filter(i=>i.include).length===0} style={{ flex:2,justifyContent:"center" }}>
+                確認新增 {scanItems.filter(i=>i.include).length} 筆花費
+              </Btn>
+            </div>
+          </div>
+        )}
+        {scanStep==="confirm" && scanItems.length===0 && (
+          <div style={{ textAlign:"center",padding:28,color:T.inkLight }}>
+            <div style={{ fontSize:36,marginBottom:10 }}>🤔</div>
+            <div style={{ fontFamily:F.serif,fontStyle:"italic" }}>未能辨識出品項</div>
+            <Btn variant="subtle" size="sm" onClick={()=>setScanStep("upload")} style={{ marginTop:14 }}>← 重新掃描</Btn>
+          </div>
+        )}
+      </Modal>
+    </div>
+  );
+}
+
+/* ══════════════════════════════════════════════════════════
+   OVERVIEW
+══════════════════════════════════════════════════════════ */
+function OverviewTab({ trips, setTrips, setActiveTrip, onScan }) {
+  const [showAdd, setShowAdd] = useState(false);
+  const [confirmId, setConfirmId] = useState(null);
+  const [form, setForm] = useState({ country:"",city:"",flag:"",start:"",end:"",companions:"",budget:"" });
+
+  const stats = {
+    countries: new Set(trips.map(t=>t.country)).size,
+    cities: new Set(trips.map(t=>t.city)).size,
+    spent: trips.reduce((s,t)=>s+(t.spent||0),0),
+    days: trips.reduce((s,t)=>!t.start||!t.end?s:s+Math.round((new Date(t.end)-new Date(t.start))/86400000)+1,0),
+  };
+
+  const add = () => {
+    if(!form.country||!form.city) return;
+    setTrips(p=>[...p,{id:Date.now(),...form,companions:form.companions?form.companions.split(",").map(x=>x.trim()):[],budget:+form.budget||0,spent:0,days:[{id:`d${Date.now()}`,label:"Day 1",spots:[]}],expenses:[],memories:[]}]);
+    setShowAdd(false);
+    setForm({country:"",city:"",flag:"",start:"",end:"",companions:"",budget:""});
+  };
+  const del = id => { setTrips(p=>p.filter(t=>t.id!==id)); setConfirmId(null); };
+
+  return (
+    <div style={{ animation:"fadeUp 0.25s ease-out" }}>
+      {/* Page title */}
+      <div style={{ marginBottom:28 }}>
+        <Eyebrow style={{ marginBottom:6 }}>我的旅行紀錄</Eyebrow>
+        <div style={{ fontFamily:F.serif,fontSize:28,fontWeight:700,fontStyle:"italic",color:T.ink,lineHeight:1.1 }}>
+          Journey<br/>Journal
+        </div>
+      </div>
+
+      {/* Stats — horizontal strip */}
+      <div style={{ display:"grid",gridTemplateColumns:"1fr 1fr 1fr 1fr",gap:0,marginBottom:32,background:T.surface,borderRadius:18,border:`1px solid ${T.border}`,overflow:"hidden",boxShadow:Sh.sm }}>
+        {[
+          { n:stats.countries, u:"國家", sub:"已踏足" },
+          { n:stats.cities,    u:"城市", sub:"已走過" },
+          { n:stats.days,      u:"天",   sub:"旅行中" },
+          { n:`${(stats.spent/1000).toFixed(0)}K`, u:"NT$", sub:"花費" },
+        ].map((s,i)=>(
+          <div key={s.u} style={{ padding:"18px 14px",textAlign:"center",borderRight:i<3?`1px solid ${T.border}`:"none" }}>
+            <div style={{ fontFamily:F.serif,fontSize:26,fontWeight:700,fontStyle:"italic",color:T.rose,lineHeight:1 }}>{s.n}</div>
+            <div style={{ fontSize:11,color:T.ink,fontWeight:700,marginTop:3,fontFamily:F.sans }}>{s.u}</div>
+            <div style={{ fontSize:10,color:T.inkFaint,marginTop:1,fontFamily:F.sans }}>{s.sub}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* Quick action banner */}
+      <div onClick={onScan} style={{ background:`linear-gradient(135deg,${T.rose},${T.roseDark})`, borderRadius:18, padding:"18px 20px", marginBottom:28, cursor:"pointer", display:"flex", alignItems:"center", gap:16, boxShadow:Sh.rose, transition:"all 0.18s" }}
+        onMouseEnter={e=>Object.assign(e.currentTarget.style,{transform:"translateY(-2px)",boxShadow:`0 8px 28px rgba(194,59,110,0.4)`})}
+        onMouseLeave={e=>Object.assign(e.currentTarget.style,{transform:"translateY(0)",boxShadow:Sh.rose})}>
+        <div style={{ width:48,height:48,borderRadius:"50%",background:"rgba(255,255,255,0.2)",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0 }}>
+          <Ico d={D.camera} size={24} color={T.white}/>
+        </div>
+        <div style={{ flex:1 }}>
+          <div style={{ fontFamily:F.serif,fontSize:16,fontWeight:700,fontStyle:"italic",color:T.white,marginBottom:2 }}>掃描收據 · 快速記帳</div>
+          <div style={{ fontSize:12,color:"rgba(255,255,255,0.75)",fontFamily:F.sans }}>拍照或上傳，AI 自動辨識品項金額</div>
+        </div>
+        <div style={{ fontSize:20,opacity:0.8 }}>›</div>
+      </div>
+
+      {/* Section header */}
+      <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16 }}>
+        <Eyebrow>旅程列表</Eyebrow>
+        <Btn size="sm" onClick={()=>setShowAdd(true)}><Ico d={D.plus} size={13} color={T.white}/> 新增旅程</Btn>
+      </div>
+
+      {trips.length===0 && <Empty emoji="✈️" text="尚無旅程記錄" sub="點選「新增旅程」，開始你的旅行故事"/>}
+
+      {/* Trip cards — diagonal slash design */}
+      <div style={{ display:"flex",flexDirection:"column",gap:16 }}>
+        {trips.map(trip=>{
+          const td = trip.start&&trip.end ? Math.round((new Date(trip.end)-new Date(trip.start))/86400000)+1 : 0;
+          const pct = trip.budget>0 ? Math.min(100,Math.round((trip.spent||0)/trip.budget*100)) : 0;
+          const future = trip.start && new Date(trip.start)>new Date();
+          return (
+            <div key={trip.id} style={{ background:T.surface,borderRadius:20,border:`1px solid ${T.border}`,overflow:"hidden",boxShadow:Sh.sm,cursor:"pointer",transition:"all 0.2s" }}
+              onMouseEnter={e=>Object.assign(e.currentTarget.style,{boxShadow:Sh.md,transform:"translateY(-2px)"})}
+              onMouseLeave={e=>Object.assign(e.currentTarget.style,{boxShadow:Sh.sm,transform:"translateY(0)"})}
+            >
+              <div style={{ display:"flex" }}>
+                {/* Slash colour block */}
+                <div onClick={()=>setActiveTrip(trip.id)} style={{ position:"relative",width:100,flexShrink:0,background:`linear-gradient(160deg,${T.roseDark},${T.roseDeep})`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:44,minHeight:110 }}>
+                  {trip.flag||"🌍"}
+                  {/* Diagonal slash right edge */}
+                  <div style={{ position:"absolute",right:-1,top:0,bottom:0,width:24,background:T.surface,clipPath:"polygon(100% 0,100% 100%,0 100%)" }}/>
+                </div>
+                {/* Content */}
+                <div style={{ flex:1,padding:"16px 18px 16px 10px",minWidth:0 }}>
+                  <div style={{ display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:6 }}>
+                    <div onClick={()=>setActiveTrip(trip.id)} style={{ flex:1,minWidth:0 }}>
+                      <Eyebrow style={{ marginBottom:3 }}>{trip.country}</Eyebrow>
+                      <div style={{ fontFamily:F.serif,fontSize:17,fontWeight:700,fontStyle:"italic",color:T.ink,marginBottom:3 }}>{trip.city}</div>
+                      <div style={{ fontSize:11.5,color:T.inkLight,fontFamily:F.sans }}>
+                        {trip.start||"?"} — {trip.end||"?"}{td>0?` · ${td}天`:""}
+                      </div>
+                      {trip.companions?.length>0 && <div style={{ fontSize:11,color:T.inkFaint,marginTop:1,fontFamily:F.sans }}>👥 {trip.companions.join("、")}</div>}
+                    </div>
+                    <div style={{ display:"flex",gap:6,alignItems:"center",flexShrink:0,marginLeft:8 }}>
+                      <Pill size="sm" bg={future?T.goldPale:T.rosePale} color={future?T.gold:T.rose}>{future?"即將出發":"已完成"}</Pill>
+                      <button onClick={()=>setConfirmId(trip.id)} style={{ background:"none",border:"none",cursor:"pointer",padding:4,opacity:0.35 }}>
+                        <Ico d={D.trash} size={13} color={T.inkMid}/>
+                      </button>
+                    </div>
+                  </div>
+                  {trip.budget>0 && (
+                    <div style={{ marginTop:10 }}>
+                      <div style={{ display:"flex",justifyContent:"space-between",marginBottom:4 }}>
+                        <span style={{ fontSize:10.5,color:T.inkFaint,fontFamily:F.sans }}>預算使用</span>
+                        <span style={{ fontSize:10.5,color:T.inkLight,fontWeight:700,fontFamily:F.sans }}>{pct}%</span>
+                      </div>
+                      <div style={{ height:3,background:T.bgDeep,borderRadius:2 }}>
+                        <div style={{ height:"100%",width:`${pct}%`,background:pct>90?T.rose:T.gold,borderRadius:2 }}/>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      <Modal open={showAdd} onClose={()=>setShowAdd(false)} title="新增旅程">
+        <div style={{ display:"grid",gridTemplateColumns:"3fr 1fr",gap:"0 10px" }}>
+          <Inp label="目的地國家 *" value={form.country} onChange={v=>setForm(p=>({...p,country:v}))} placeholder="韓國"/>
+          <Inp label="國旗 Emoji" value={form.flag} onChange={v=>setForm(p=>({...p,flag:v}))} placeholder="🇰🇷"/>
+        </div>
+        <Inp label="城市 *" value={form.city} onChange={v=>setForm(p=>({...p,city:v}))} placeholder="首爾"/>
+        <div style={{ display:"grid",gridTemplateColumns:"1fr 1fr",gap:"0 10px" }}>
+          <Inp label="出發日期" value={form.start} onChange={v=>setForm(p=>({...p,start:v}))} type="date"/>
+          <Inp label="回程日期" value={form.end} onChange={v=>setForm(p=>({...p,end:v}))} type="date"/>
+        </div>
+        <Inp label="同行人（逗號分隔）" value={form.companions} onChange={v=>setForm(p=>({...p,companions:v}))} placeholder="老公, 大寶, 小寶"/>
+        <Inp label="旅遊預算 NT$" value={form.budget} onChange={v=>setForm(p=>({...p,budget:v}))} type="number" placeholder="80000"/>
+        <div style={{ display:"flex",gap:10,justifyContent:"flex-end",marginTop:6 }}>
+          <Btn variant="subtle" size="sm" onClick={()=>setShowAdd(false)}>取消</Btn>
+          <Btn size="sm" onClick={add} disabled={!form.country||!form.city}>建立旅程</Btn>
+        </div>
+      </Modal>
+
+      <Modal open={!!confirmId} onClose={()=>setConfirmId(null)} title="刪除旅程" width={360}>
+        <div style={{ fontSize:14,color:T.inkMid,lineHeight:1.75,marginBottom:20,fontFamily:F.sans }}>
+          確定刪除這趟旅程？<br/>所有行程、花費、回憶將一併刪除，無法復原。
+        </div>
+        <div style={{ display:"flex",gap:10,justifyContent:"flex-end" }}>
+          <Btn variant="subtle" size="sm" onClick={()=>setConfirmId(null)}>取消</Btn>
+          <Btn variant="danger" size="sm" onClick={()=>del(confirmId)}>確定刪除</Btn>
+        </div>
+      </Modal>
+    </div>
+  );
+}
+
+/* ══════════════════════════════════════════════════════════
+   FAVORITES
+══════════════════════════════════════════════════════════ */
+const FTYPES = ["餐廳","咖啡廳","景點","精品店"];
+const FE = { 餐廳:"🍽️",咖啡廳:"☕",景點:"🏛️",精品店:"🛍️" };
+const FACCENTMAP = { 餐廳:T.rose, 咖啡廳:T.gold, 景點:"#4A6FA5", 精品店:"#8A5AC4" };
+
+function FavoritesTab({ favs, setFavs }) {
+  const [filter, setFilter] = useState("全部");
+  const [showAdd, setShowAdd] = useState(false);
+  const [form, setForm] = useState({ name:"",type:"餐廳",country:"",city:"",addr:"",note:"" });
+  const list = filter==="全部" ? favs : favs.filter(f=>f.type===filter);
+  const add = () => { if(!form.name) return; setFavs(p=>[...p,{id:`f${Date.now()}`,...form}]); setShowAdd(false); setForm({name:"",type:"餐廳",country:"",city:"",addr:"",note:""}); };
+  const del = id => setFavs(p=>p.filter(f=>f.id!==id));
+
+  return (
+    <div style={{ animation:"fadeUp 0.25s ease-out" }}>
+      <div style={{ marginBottom:24 }}>
+        <Eyebrow style={{ marginBottom:5 }}>我的最愛</Eyebrow>
+        <div style={{ fontFamily:F.serif,fontSize:26,fontWeight:700,fontStyle:"italic",color:T.ink }}>Saved Places</div>
+      </div>
+
+      {/* Filter tabs */}
+      <div style={{ display:"flex",gap:8,overflowX:"auto",paddingBottom:4,marginBottom:22 }}>
+        {["全部",...FTYPES].map(type=>(
+          <button key={type} onClick={()=>setFilter(type)} style={{ padding:"7px 18px",borderRadius:100,border:"none",cursor:"pointer",flexShrink:0,fontFamily:F.sans,fontSize:12.5,fontWeight:700,
+            background:filter===type?T.ink:T.bgDeep,color:filter===type?T.white:T.inkMid }}>{type}</button>
+        ))}
+        <Btn size="sm" onClick={()=>setShowAdd(true)} style={{ flexShrink:0,marginLeft:"auto" }}><Ico d={D.plus} size={13} color={T.white}/> 新增</Btn>
+      </div>
+
+      {list.length===0 && <Empty emoji="🏷️" text="尚無收藏" sub="加入你心儀的地點"/>}
+
+      <div style={{ display:"grid",gridTemplateColumns:"1fr 1fr",gap:12 }}>
+        {list.map(f=>{
+          const accent = FACCENTMAP[f.type]||T.rose;
+          return (
+            <div key={f.id} style={{ background:T.surface,borderRadius:18,border:`1px solid ${T.border}`,overflow:"hidden",boxShadow:Sh.xs,position:"relative" }}>
+              {/* Top accent stripe */}
+              <div style={{ height:4,background:accent }}/>
+              <div style={{ padding:"14px 14px 14px" }}>
+                <button onClick={()=>del(f.id)} style={{ position:"absolute",top:14,right:12,background:"none",border:"none",cursor:"pointer",opacity:0.3 }}>
+                  <Ico d={D.x} size={13} color={T.inkMid}/>
+                </button>
+                <div style={{ fontSize:24,marginBottom:8 }}>{FE[f.type]}</div>
+                <div style={{ fontFamily:F.serif,fontSize:14,fontWeight:700,fontStyle:"italic",color:T.ink,marginBottom:6,paddingRight:18,lineHeight:1.3 }}>{f.name}</div>
+                <Pill bg={accent+"15"} color={accent}>{f.type}</Pill>
+                {f.city && <div style={{ fontSize:11.5,color:T.inkLight,marginTop:8,fontFamily:F.sans }}>📍 {f.city}{f.country?`, ${f.country}`:""}</div>}
+                {f.note && <div style={{ fontSize:11,color:T.inkFaint,marginTop:5,fontStyle:"italic",lineHeight:1.5,fontFamily:F.sans }}>"{f.note}"</div>}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      <Modal open={showAdd} onClose={()=>setShowAdd(false)} title="新增收藏">
+        <div style={{ display:"grid",gridTemplateColumns:"3fr 1fr",gap:"0 10px" }}>
+          <Inp label="名稱 *" value={form.name} onChange={v=>setForm(p=>({...p,name:v}))} placeholder="Cafe Bora"/>
+          <div style={{ marginBottom:16 }}>
+            <Eyebrow style={{ marginBottom:6 }}>類型</Eyebrow>
+            <select value={form.type} onChange={e=>setForm(p=>({...p,type:e.target.value}))} style={{ width:"100%",padding:"11px 10px",borderRadius:11,border:`1.5px solid ${T.border}`,fontSize:13,color:T.ink,background:T.surface,fontFamily:F.sans }}>
+              {FTYPES.map(t=><option key={t}>{t}</option>)}
+            </select>
+          </div>
+        </div>
+        <div style={{ display:"grid",gridTemplateColumns:"1fr 1fr",gap:"0 10px" }}>
+          <Inp label="國家" value={form.country} onChange={v=>setForm(p=>({...p,country:v}))} placeholder="韓國"/>
+          <Inp label="城市" value={form.city} onChange={v=>setForm(p=>({...p,city:v}))} placeholder="首爾"/>
+        </div>
+        <Inp label="地址" value={form.addr} onChange={v=>setForm(p=>({...p,addr:v}))} placeholder="明洞，中區"/>
+        <Textarea label="備註" value={form.note} onChange={v=>setForm(p=>({...p,note:v}))} placeholder="推薦理由或去的最佳時機…" rows={2}/>
+        <div style={{ display:"flex",gap:10,justifyContent:"flex-end" }}>
+          <Btn variant="subtle" size="sm" onClick={()=>setShowAdd(false)}>取消</Btn>
+          <Btn size="sm" onClick={add} disabled={!form.name}>加入收藏</Btn>
+        </div>
+      </Modal>
+    </div>
+  );
+}
+
+/* ══════════════════════════════════════════════════════════
+   COUNTRY DATABASE
+══════════════════════════════════════════════════════════ */
+const DB_SEC = [
+  { id:"mustEat",  l:"必吃清單",  e:"🍽️", arr:true  },
+  { id:"mustBuy",  l:"必買清單",  e:"🛍️", arr:true  },
+  { id:"taxRefund",l:"退稅資訊",  e:"💳", arr:false },
+  { id:"subway",   l:"地鐵攻略",  e:"🚇", arr:false },
+  { id:"airport",  l:"機場交通",  e:"✈️", arr:false },
+  { id:"notes",    l:"注意事項",  e:"📝", arr:true  },
+];
+
+function DatabaseTab({ db, setDb }) {
+  const [sel, setSel] = useState(null);
+  const [sec, setSec] = useState("mustEat");
+  const [showNew, setShowNew] = useState(false);
+  const [newName, setNewName] = useState("");
+  const [addVal, setAddVal] = useState("");
+  const [editTxt, setEditTxt] = useState("");
+  const [editing, setEditing] = useState(false);
+
+  const createC = () => { if(!newName.trim()) return; setDb(p=>({...p,[newName.trim()]:{mustEat:[],mustBuy:[],taxRefund:"",subway:"",airport:"",notes:[]}})); setSel(newName.trim()); setShowNew(false); setNewName(""); };
+  const delC = n => { setDb(p=>{const x={...p};delete x[n];return x;}); };
+
+  if(!sel) return (
+    <div style={{ animation:"fadeUp 0.25s ease-out" }}>
+      <div style={{ marginBottom:24 }}>
+        <Eyebrow style={{ marginBottom:5 }}>行前準備</Eyebrow>
+        <div style={{ fontFamily:F.serif,fontSize:26,fontWeight:700,fontStyle:"italic",color:T.ink }}>Country Files</div>
+        <div style={{ fontSize:13,color:T.inkLight,marginTop:4,fontFamily:F.sans }}>超級 J 人的旅行備忘錄</div>
+      </div>
+      {Object.keys(db).length===0 && <Empty emoji="📖" text="尚無國家資料" sub="新增你計畫前往的國家"/>}
+      <div style={{ display:"flex",justifyContent:"flex-end",marginBottom:16 }}>
+        <Btn size="sm" onClick={()=>setShowNew(true)}><Ico d={D.plus} size={13} color={T.white}/> 新增國家</Btn>
+      </div>
+      <div style={{ display:"grid",gridTemplateColumns:"1fr 1fr",gap:12 }}>
+        {Object.keys(db).map(n=>{
+          const d = db[n];
+          return (
+            <div key={n} style={{ background:T.surface,borderRadius:18,border:`1px solid ${T.border}`,overflow:"hidden",boxShadow:Sh.xs,cursor:"pointer",position:"relative",transition:"all 0.18s" }}
+              onClick={()=>setSel(n)}
+              onMouseEnter={e=>Object.assign(e.currentTarget.style,{boxShadow:Sh.md,transform:"translateY(-2px)"})}
+              onMouseLeave={e=>Object.assign(e.currentTarget.style,{boxShadow:Sh.xs,transform:"translateY(0)"})}>
+              <div style={{ height:4,background:`linear-gradient(90deg,${T.rose},${T.gold})` }}/>
+              <div style={{ padding:"14px 14px" }}>
+                <button onClick={e=>{e.stopPropagation();delC(n);}} style={{ position:"absolute",top:14,right:12,background:"none",border:"none",cursor:"pointer",opacity:0.3 }}><Ico d={D.x} size={13} color={T.inkMid}/></button>
+                <div style={{ fontSize:30,marginBottom:8 }}>🌍</div>
+                <div style={{ fontFamily:F.serif,fontSize:16,fontWeight:700,fontStyle:"italic",marginBottom:8 }}>{n}</div>
+                {DB_SEC.filter(s=>s.arr).map(s=>(
+                  <div key={s.id} style={{ fontSize:11.5,color:T.inkLight,marginBottom:2,fontFamily:F.sans }}>{s.e} {(d[s.id]||[]).length} 項 {s.l}</div>
+                ))}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+      <Modal open={showNew} onClose={()=>setShowNew(false)} title="新增國家" width={360}>
+        <Inp label="國家名稱" value={newName} onChange={setNewName} placeholder="日本"/>
+        <div style={{ display:"flex",gap:10,justifyContent:"flex-end" }}>
+          <Btn variant="subtle" size="sm" onClick={()=>setShowNew(false)}>取消</Btn>
+          <Btn size="sm" onClick={createC} disabled={!newName.trim()}>建立</Btn>
+        </div>
+      </Modal>
+    </div>
+  );
+
+  const data = db[sel];
+  const si = DB_SEC.find(s=>s.id===sec);
+  const curVal = data[sec];
+  const addItem = () => { if(!addVal.trim()) return; setDb(p=>({...p,[sel]:{...p[sel],[sec]:[...(p[sel][sec]||[]),addVal.trim()]}})); setAddVal(""); };
+  const delItem = i => setDb(p=>({...p,[sel]:{...p[sel],[sec]:p[sel][sec].filter((_,j)=>j!==i)}}));
+  const saveTxt = () => { setDb(p=>({...p,[sel]:{...p[sel],[sec]:editTxt}})); setEditing(false); };
+
+  return (
+    <div style={{ animation:"fadeUp 0.25s ease-out" }}>
+      <div style={{ display:"flex",alignItems:"center",gap:12,marginBottom:22 }}>
+        <button onClick={()=>{setSel(null);setEditing(false);}} style={{ background:T.bgDeep,border:"none",borderRadius:10,padding:"8px 16px",cursor:"pointer",color:T.inkMid,fontWeight:600,fontSize:12.5,fontFamily:F.sans }}>← 返回</button>
+        <div style={{ fontFamily:F.serif,fontSize:18,fontWeight:700,fontStyle:"italic",color:T.ink }}>{sel}</div>
+      </div>
+
+      {/* Section tabs */}
+      <div style={{ display:"flex",gap:7,overflowX:"auto",paddingBottom:6,marginBottom:20 }}>
+        {DB_SEC.map(s=>(
+          <button key={s.id} onClick={()=>{setSec(s.id);setEditing(false);setAddVal("");}} style={{ padding:"7px 14px",borderRadius:100,border:"none",cursor:"pointer",flexShrink:0,fontFamily:F.sans,fontSize:12,fontWeight:700,
+            background:sec===s.id?T.ink:T.bgDeep,color:sec===s.id?T.white:T.inkMid }}>{s.e} {s.l}</button>
+        ))}
+      </div>
+
+      <div style={{ background:T.surface,borderRadius:18,border:`1px solid ${T.border}`,padding:"18px 20px",boxShadow:Sh.xs }}>
+        <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16 }}>
+          <div style={{ fontFamily:F.serif,fontSize:16,fontWeight:700,fontStyle:"italic",color:T.ink }}>{si.e} {si.l}</div>
+          {!si.arr && !editing && <Btn size="xs" variant="outline" onClick={()=>{setEditTxt(curVal||"");setEditing(true);}}><Ico d={D.edit} size={11} color={T.rose}/> 編輯</Btn>}
+        </div>
+
+        {si.arr ? (
+          <div>
+            <div style={{ display:"flex",gap:8,marginBottom:16 }}>
+              <input value={addVal} onChange={e=>setAddVal(e.target.value)} placeholder="輸入後按 Enter 新增…"
+                onKeyDown={e=>e.key==="Enter"&&addItem()}
+                style={{ flex:1,padding:"9px 14px",borderRadius:10,border:`1.5px solid ${T.border}`,fontSize:13.5,fontFamily:F.sans,color:T.ink }}
+                onFocus={e=>e.target.style.borderColor=T.rose} onBlur={e=>e.target.style.borderColor=T.border}/>
+              <Btn size="sm" onClick={addItem} disabled={!addVal.trim()}><Ico d={D.plus} size={13} color={T.white}/></Btn>
+            </div>
+            {(curVal||[]).length===0 && <div style={{ color:T.inkFaint,fontSize:13,textAlign:"center",padding:"12px 0",fontStyle:"italic",fontFamily:F.serif }}>尚無項目</div>}
+            {(curVal||[]).map((item,i)=>(
+              <div key={i}>
+                <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center",padding:"10px 0" }}>
+                  <div style={{ display:"flex",gap:10,alignItems:"center" }}>
+                    <div style={{ width:6,height:6,borderRadius:"50%",background:T.rose,flexShrink:0 }}/>
+                    <span style={{ fontSize:13.5,fontFamily:F.sans,color:T.ink }}>{item}</span>
+                  </div>
+                  <button onClick={()=>delItem(i)} style={{ background:"none",border:"none",cursor:"pointer",opacity:0.35 }}><Ico d={D.x} size={13} color={T.inkMid}/></button>
+                </div>
+                {i<curVal.length-1 && <Rule/>}
+              </div>
+            ))}
+          </div>
+        ) : editing ? (
+          <div>
+            <Textarea value={editTxt} onChange={setEditTxt} rows={5}/>
+            <div style={{ display:"flex",gap:8,justifyContent:"flex-end" }}>
+              <Btn variant="subtle" size="sm" onClick={()=>setEditing(false)}>取消</Btn>
+              <Btn size="sm" onClick={saveTxt}>儲存</Btn>
+            </div>
+          </div>
+        ) : (
+          <div style={{ fontSize:13.5,lineHeight:1.9,color:T.inkMid,whiteSpace:"pre-wrap",fontFamily:F.sans }}>
+            {curVal || <span style={{ color:T.inkFaint,fontStyle:"italic",fontFamily:F.serif }}>尚無資料，點選右上角「編輯」填寫</span>}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* ══════════════════════════════════════════════════════════
+   YEAR REVIEW
+══════════════════════════════════════════════════════════ */
+function YearReview({ trips }) {
+  const year = new Date().getFullYear();
+  const yt = trips.filter(t=>t.start?.slice(0,4)===String(year));
+  const countries = [...new Set(yt.map(t=>t.country))];
+  const spent = yt.reduce((s,t)=>s+(t.spent||0),0);
+  const allC = yt.flatMap(t=>t.companions||[]);
+  const cnt = {}; allC.forEach(x=>{cnt[x]=(cnt[x]||0)+1;});
+  const top = Object.entries(cnt).sort((a,b)=>b[1]-a[1])[0];
+
+  return (
+    <div style={{ animation:"fadeUp 0.25s ease-out" }}>
+      {/* Large editorial year display */}
+      <div style={{ position:"relative",background:T.ink,borderRadius:22,padding:"32px 24px 28px",marginBottom:28,overflow:"hidden",boxShadow:Sh.lg }}>
+        {/* Ghost year watermark */}
+        <div style={{ position:"absolute",right:-10,top:-20,fontFamily:F.serif,fontSize:160,fontWeight:700,color:"rgba(255,255,255,0.04)",lineHeight:1,pointerEvents:"none",userSelect:"none" }}>{year}</div>
+        <Eyebrow style={{ color:"rgba(255,255,255,0.4)",marginBottom:8 }}>Annual Review</Eyebrow>
+        <div style={{ fontFamily:F.serif,fontSize:42,fontWeight:700,fontStyle:"italic",color:T.white,lineHeight:1,marginBottom:4 }}>{year}</div>
+        <div style={{ fontSize:13,color:"rgba(255,255,255,0.5)",fontFamily:F.sans }}>你的旅行人生年度精彩回顧</div>
+        {/* Gold horizontal rule */}
+        <div style={{ height:1,background:`linear-gradient(90deg,${T.gold},transparent)`,margin:"20px 0 0" }}/>
+      </div>
+
+      {yt.length===0 ? (
+        <Empty emoji="📅" text={`${year} 年尚無旅行記錄`} sub="快去新增你的旅程吧！"/>
+      ) : (
+        <>
+          {/* Stats grid */}
+          <div style={{ display:"grid",gridTemplateColumns:"1fr 1fr",gap:12,marginBottom:24 }}>
+            {[
+              { n:`${yt.length}`, u:"次旅行", e:"✈️", accent:T.rose },
+              { n:`${countries.length}`, u:"個國家", e:"🌏", accent:T.gold },
+              { n:`$${(spent/1000).toFixed(0)}K`, u:"NT$ 花費", e:"💰", accent:T.roseDark },
+              { n:top?.[0]||"獨行俠", u:"最常同行", e:"👫", accent:T.inkMid },
+            ].map(s=>(
+              <div key={s.u} style={{ background:T.surface,borderRadius:18,border:`1px solid ${T.border}`,padding:"20px 16px",boxShadow:Sh.xs,position:"relative",overflow:"hidden" }}>
+                <div style={{ position:"absolute",right:14,top:14,fontSize:24,opacity:0.2 }}>{s.e}</div>
+                <div style={{ fontFamily:F.serif,fontSize:26,fontWeight:700,fontStyle:"italic",color:s.accent,marginBottom:4,lineHeight:1 }}>{s.n}</div>
+                <div style={{ fontSize:12,color:T.inkLight,fontFamily:F.sans }}>{s.u}</div>
+              </div>
+            ))}
+          </div>
+
+          {/* Countries visited */}
+          <div style={{ background:T.surface,borderRadius:18,border:`1px solid ${T.border}`,padding:"18px 20px",marginBottom:16,boxShadow:Sh.xs }}>
+            <Eyebrow style={{ marginBottom:14 }}>走過的國家</Eyebrow>
+            <div style={{ display:"flex",flexWrap:"wrap",gap:8 }}>
+              {countries.map(co=>(
+                <div key={co} style={{ background:T.ink,color:T.white,padding:"8px 18px",borderRadius:100,fontSize:13.5,fontWeight:700,fontFamily:F.serif,fontStyle:"italic" }}>{co}</div>
+              ))}
+            </div>
+          </div>
+
+          {/* Trip list */}
+          <div style={{ background:T.surface,borderRadius:18,border:`1px solid ${T.border}`,padding:"18px 20px",boxShadow:Sh.xs }}>
+            <Eyebrow style={{ marginBottom:16 }}>旅程回顧</Eyebrow>
+            {yt.map((t,i)=>(
+              <div key={t.id}>
+                <div style={{ display:"flex",alignItems:"center",gap:14,padding:"12px 0" }}>
+                  <div style={{ fontSize:26 }}>{t.flag||"🌍"}</div>
+                  <div style={{ flex:1 }}>
+                    <div style={{ fontFamily:F.serif,fontSize:14,fontWeight:700,fontStyle:"italic",color:T.ink }}>{t.city}，{t.country}</div>
+                    <div style={{ fontSize:11.5,color:T.inkLight,fontFamily:F.sans }}>{t.start} — {t.end}</div>
+                  </div>
+                  <div style={{ fontFamily:F.serif,fontSize:15,fontWeight:700,fontStyle:"italic",color:T.rose }}>${(t.spent||0).toLocaleString()}</div>
+                </div>
+                {i<yt.length-1 && <Rule/>}
+              </div>
+            ))}
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
+/* ══════════════════════════════════════════════════════════
+   ROOT APP
+══════════════════════════════════════════════════════════ */
+const NAV = [
+  { id:"overview", label:"旅程",   icon:D.plane },
+  { id:"favs",     label:"收藏",   icon:D.heart },
+  { id:"db",       label:"資料庫", icon:D.book  },
+  { id:"year",     label:"年度",   icon:D.star  },
+];
+
+/* ══════════════════════════════════════════════════════════
+   SYNC PANEL
+══════════════════════════════════════════════════════════ */
+function SyncPanel({ open, onClose, trips, favs, db, onImport }) {
+  const [gdStatus, setGdStatus] = useState("idle"); // idle | loading | ok | err
+  const [gdMsg, setGdMsg] = useState("");
+  const [importing, setImporting] = useState(false);
+  const [saveStatus, setSaveStatus] = useState("idle");
+  const importRef = useRef(null);
+
+  const allData = { trips, favs, db, exportedAt: new Date().toISOString(), version: 1 };
+
+  /* ── JSON Export ── */
+  const exportJSON = () => {
+    const blob = new Blob([JSON.stringify(allData, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `travel-life-${new Date().toISOString().slice(0,10)}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  /* ── JSON Import ── */
+  const handleImportFile = e => {
+    const file = e.target.files[0]; if (!file) return;
+    setImporting(true);
+    const rd = new FileReader();
+    rd.onload = ev => {
+      try {
+        const parsed = JSON.parse(ev.target.result);
+        if (!parsed.trips) throw new Error("格式不符");
+        onImport(parsed);
+        setImporting(false);
+        onClose();
+      } catch {
+        alert("檔案格式錯誤，請確認是 Travel Life 匯出的 JSON 檔案");
+        setImporting(false);
+      }
+    };
+    rd.readAsText(file);
+  };
+
+  /* ── window.storage (Artifact persistent storage) ── */
+  const saveToStorage = async () => {
+    setSaveStatus("loading");
+    try {
+      localStorage.setItem("travellife-data", JSON.stringify(allData));
+      setSaveStatus("ok");
+      setTimeout(() => setSaveStatus("idle"), 2500);
+    } catch {
+      setSaveStatus("err");
+      setTimeout(() => setSaveStatus("idle"), 2500);
+    }
+  };
+
+  const loadFromStorage = async () => {
+    setSaveStatus("loading");
+    try {
+      const result = (await Promise.resolve({ value: localStorage.getItem("travellife-data") }));
+      if (!result) { alert("尚未有儲存的資料"); setSaveStatus("idle"); return; }
+      const parsed = JSON.parse(result.value);
+      onImport(parsed);
+      setSaveStatus("ok");
+      setTimeout(() => setSaveStatus("idle"), 2500);
+      onClose();
+    } catch {
+      setSaveStatus("err");
+      setTimeout(() => setSaveStatus("idle"), 2500);
+    }
+  };
+
+  /* ── Google Drive ── */
+  const GD_CLIENT_ID = "YOUR_GOOGLE_CLIENT_ID"; // user replaces this
+  const GD_SCOPE = "https://www.googleapis.com/auth/drive.file";
+  const GD_FILE_NAME = "travel-life-sync.json";
+
+  const loadGapi = () => new Promise((res, rej) => {
+    if (window.gapi) { res(); return; }
+    const s = document.createElement("script");
+    s.src = "https://apis.google.com/js/api.js";
+    s.onload = () => window.gapi.load("client:auth2", res);
+    s.onerror = rej;
+    document.head.appendChild(s);
+  });
+
+  const gdAuth = async () => {
+    await loadGapi();
+    await window.gapi.client.init({ clientId: GD_CLIENT_ID, scope: GD_SCOPE, discoveryDocs: ["https://www.googleapis.com/discovery/v1/apis/drive/v3/rest"] });
+    const auth = window.gapi.auth2.getAuthInstance();
+    if (!auth.isSignedIn.get()) await auth.signIn();
+  };
+
+  const saveToGDrive = async () => {
+    if (GD_CLIENT_ID === "YOUR_GOOGLE_CLIENT_ID") {
+      setGdMsg("請先在程式碼中填入你的 Google Client ID（見說明）");
+      setGdStatus("err"); return;
+    }
+    setGdStatus("loading"); setGdMsg("連接 Google Drive…");
+    try {
+      await gdAuth();
+      setGdMsg("搜尋同步檔案…");
+      const search = await window.gapi.client.drive.files.list({ q: `name='${GD_FILE_NAME}' and trashed=false`, fields: "files(id,name)" });
+      const files = search.result.files;
+      const content = JSON.stringify(allData, null, 2);
+      const boundary = "travel_life_boundary";
+      const body = `--${boundary}\r\nContent-Type: application/json\r\n\r\n${JSON.stringify({ name: GD_FILE_NAME, mimeType: "application/json" })}\r\n--${boundary}\r\nContent-Type: application/json\r\n\r\n${content}\r\n--${boundary}--`;
+
+      if (files.length > 0) {
+        setGdMsg("更新同步檔案…");
+        await window.gapi.client.request({ path: `/upload/drive/v3/files/${files[0].id}`, method: "PATCH", params: { uploadType: "multipart" }, headers: { "Content-Type": `multipart/related; boundary=${boundary}` }, body });
+      } else {
+        setGdMsg("建立同步檔案…");
+        await window.gapi.client.request({ path: "/upload/drive/v3/files", method: "POST", params: { uploadType: "multipart" }, headers: { "Content-Type": `multipart/related; boundary=${boundary}` }, body });
+      }
+      setGdStatus("ok"); setGdMsg(`已同步至 Google Drive ✓  ${new Date().toLocaleTimeString()}`);
+    } catch (e) {
+      setGdStatus("err"); setGdMsg("同步失敗：" + (e.message || "請確認網路與 Client ID"));
+    }
+  };
+
+  const loadFromGDrive = async () => {
+    if (GD_CLIENT_ID === "YOUR_GOOGLE_CLIENT_ID") {
+      setGdMsg("請先在程式碼中填入你的 Google Client ID（見說明）");
+      setGdStatus("err"); return;
+    }
+    setGdStatus("loading"); setGdMsg("從 Google Drive 讀取…");
+    try {
+      await gdAuth();
+      const search = await window.gapi.client.drive.files.list({ q: `name='${GD_FILE_NAME}' and trashed=false`, fields: "files(id,name)" });
+      if (!search.result.files.length) { setGdStatus("err"); setGdMsg("找不到同步檔案，請先儲存一次"); return; }
+      const fileId = search.result.files[0].id;
+      const resp = await window.gapi.client.drive.files.get({ fileId, alt: "media" });
+      const parsed = typeof resp.result === "string" ? JSON.parse(resp.result) : resp.result;
+      onImport(parsed);
+      setGdStatus("ok"); setGdMsg("已從 Google Drive 載入資料 ✓");
+      setTimeout(() => { setGdStatus("idle"); setGdMsg(""); onClose(); }, 1500);
+    } catch (e) {
+      setGdStatus("err"); setGdMsg("載入失敗：" + (e.message || "請重試"));
+    }
+  };
+
+  if (!open) return null;
+
+  const statusColor = { idle: T.inkLight, loading: T.gold, ok: T.success, err: "#C0303A" };
+  const storageLabel = { idle:"", loading:"儲存中…", ok:"✓ 已儲存", err:"✗ 失敗" };
+
+  return (
+    <div onClick={e => e.target === e.currentTarget && onClose()}
+      style={{ position:"fixed",inset:0,background:"rgba(26,14,20,0.55)",backdropFilter:"blur(6px)",zIndex:9100,display:"flex",alignItems:"flex-end",justifyContent:"center" }}>
+      <div style={{ background:T.surface,borderRadius:"24px 24px 0 0",width:"100%",maxWidth:680,maxHeight:"88vh",overflow:"auto",boxShadow:Sh.lg,animation:"fadeUp 0.26s ease-out" }}>
+        <div style={{ display:"flex",justifyContent:"center",padding:"12px 0 0" }}>
+          <div style={{ width:40,height:4,borderRadius:2,background:T.border }}/>
+        </div>
+        <div style={{ padding:"18px 24px 36px" }}>
+
+          {/* Title */}
+          <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:24 }}>
+            <div>
+              <div style={{ fontFamily:F.serif,fontSize:20,fontWeight:700,fontStyle:"italic",color:T.ink }}>資料同步</div>
+              <div style={{ fontSize:12,color:T.inkLight,marginTop:2,fontFamily:F.sans }}>手機與電腦之間保持資料同步</div>
+            </div>
+            <button onClick={onClose} style={{ background:T.bgDeep,border:"none",borderRadius:10,padding:9,cursor:"pointer",display:"flex" }}>
+              <Ico d={D.x} size={15} color={T.inkMid}/>
+            </button>
+          </div>
+
+          {/* ── Block 1: Artifact Storage ── */}
+          <div style={{ background:T.bgDeep,borderRadius:18,padding:"18px 20px",marginBottom:14,border:`1px solid ${T.border}` }}>
+            <div style={{ display:"flex",alignItems:"center",gap:10,marginBottom:4 }}>
+              <div style={{ width:36,height:36,borderRadius:10,background:T.rosePale,display:"flex",alignItems:"center",justifyContent:"center",fontSize:18 }}>💾</div>
+              <div>
+                <div style={{ fontSize:14,fontWeight:700,color:T.ink,fontFamily:F.sans }}>本機儲存</div>
+                <div style={{ fontSize:11.5,color:T.inkLight,fontFamily:F.sans }}>儲存在這個 Artifact，重開頁面資料還在</div>
+              </div>
+            </div>
+            <Rule style={{ margin:"12px 0" }}/>
+            <div style={{ display:"flex",gap:8 }}>
+              <Btn variant="ghost" size="sm" onClick={saveToStorage} style={{ flex:1,justifyContent:"center" }} disabled={saveStatus==="loading"}>
+                {saveStatus==="loading" ? "儲存中…" : saveStatus==="ok" ? "✓ 已儲存" : "📥 儲存到本機"}
+              </Btn>
+              <Btn variant="subtle" size="sm" onClick={loadFromStorage} style={{ flex:1,justifyContent:"center" }} disabled={saveStatus==="loading"}>
+                📤 從本機載入
+              </Btn>
+            </div>
+            {saveStatus !== "idle" && saveStatus !== "loading" && (
+              <div style={{ fontSize:12,color:statusColor[saveStatus],marginTop:8,fontFamily:F.sans,textAlign:"center" }}>
+                {storageLabel[saveStatus]}
+              </div>
+            )}
+          </div>
+
+          {/* ── Block 2: JSON Export/Import ── */}
+          <div style={{ background:T.bgDeep,borderRadius:18,padding:"18px 20px",marginBottom:14,border:`1px solid ${T.border}` }}>
+            <div style={{ display:"flex",alignItems:"center",gap:10,marginBottom:4 }}>
+              <div style={{ width:36,height:36,borderRadius:10,background:T.goldPale,display:"flex",alignItems:"center",justifyContent:"center",fontSize:18 }}>📦</div>
+              <div>
+                <div style={{ fontSize:14,fontWeight:700,color:T.ink,fontFamily:F.sans }}>匯出 / 匯入 JSON 檔案</div>
+                <div style={{ fontSize:11.5,color:T.inkLight,fontFamily:F.sans }}>下載備份，傳給另一台裝置再匯入</div>
+              </div>
+            </div>
+            <div style={{ fontSize:12,color:T.inkLight,fontFamily:F.sans,lineHeight:1.65,marginBottom:12,marginTop:8,background:T.surface,borderRadius:10,padding:"10px 12px" }}>
+              📱→💻 流程：手機「匯出」→ AirDrop / LINE 傳給自己 → 電腦「匯入」<br/>
+              💻→📱 流程：電腦「匯出」→ 存到 iCloud Drive → 手機「匯入」
+            </div>
+            <Rule style={{ margin:"0 0 12px" }}/>
+            <div style={{ display:"flex",gap:8 }}>
+              <Btn variant="gold" size="sm" onClick={exportJSON} style={{ flex:1,justifyContent:"center" }}>
+                ⬇ 匯出 JSON
+              </Btn>
+              <Btn variant="subtle" size="sm" onClick={()=>importRef.current?.click()} style={{ flex:1,justifyContent:"center" }} disabled={importing}>
+                {importing ? "匯入中…" : "⬆ 匯入 JSON"}
+              </Btn>
+              <input ref={importRef} type="file" accept=".json,application/json" onChange={handleImportFile} style={{ display:"none" }}/>
+            </div>
+          </div>
+
+          {/* ── Block 3: Google Drive ── */}
+          <div style={{ background:T.bgDeep,borderRadius:18,padding:"18px 20px",border:`1px solid ${T.border}` }}>
+            <div style={{ display:"flex",alignItems:"center",gap:10,marginBottom:4 }}>
+              <div style={{ width:36,height:36,borderRadius:10,background:"#E8F0FE",display:"flex",alignItems:"center",justifyContent:"center",fontSize:18 }}>☁️</div>
+              <div>
+                <div style={{ fontSize:14,fontWeight:700,color:T.ink,fontFamily:F.sans }}>Google Drive 自動同步</div>
+                <div style={{ fontSize:11.5,color:T.inkLight,fontFamily:F.sans }}>同一個 Google 帳號，手機電腦即時同步</div>
+              </div>
+            </div>
+
+            {GD_CLIENT_ID === "YOUR_GOOGLE_CLIENT_ID" && (
+              <div style={{ background:"#FEF3CD",borderRadius:10,padding:"10px 14px",margin:"10px 0",fontSize:12,color:"#856404",fontFamily:F.sans,lineHeight:1.65 }}>
+                ⚙️ <b>設定步驟：</b><br/>
+                1. 前往 <b>console.cloud.google.com</b><br/>
+                2. 建立專案 → 啟用 Google Drive API<br/>
+                3. 憑證 → 建立 OAuth 2.0 用戶端 ID<br/>
+                4. 複製 Client ID，貼入程式碼第 <b>GD_CLIENT_ID</b> 行
+              </div>
+            )}
+
+            <Rule style={{ margin:"12px 0" }}/>
+            <div style={{ display:"flex",gap:8 }}>
+              <Btn size="sm" onClick={saveToGDrive} style={{ flex:1,justifyContent:"center",background:"#4285F4",color:"#fff",border:"none" }} disabled={gdStatus==="loading"}>
+                {gdStatus==="loading" ? "同步中…" : "☁ 儲存到 Drive"}
+              </Btn>
+              <Btn variant="subtle" size="sm" onClick={loadFromGDrive} style={{ flex:1,justifyContent:"center" }} disabled={gdStatus==="loading"}>
+                ☁ 從 Drive 載入
+              </Btn>
+            </div>
+            {gdMsg && (
+              <div style={{ fontSize:12,color:statusColor[gdStatus],marginTop:8,fontFamily:F.sans,lineHeight:1.6,textAlign:"center" }}>
+                {gdMsg}
+              </div>
+            )}
+          </div>
+
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default function App() {
+  // ── Initialise from storage on first load ──
+  const [trips, setTrips] = useState([]);
+  const [favs, setFavs] = useState([]);
+  const [db, setDb] = useState({});
+  const [tab, setTab] = useState("overview");
+  const [activeTrip, setActiveTrip] = useState(null);
+  const [showScan, setShowScan] = useState(false);
+  const [showSync, setShowSync] = useState(false);
+  const [lastSaved, setLastSaved] = useState(null);
+  const saveTimer = useRef(null);
+  const trip = trips.find(t => t.id === activeTrip);
+
+  // Auto-load from artifact storage on mount
+  useEffect(() => {
+    (async () => {
+      try {
+        const result = (await Promise.resolve({ value: localStorage.getItem("travellife-data") }));
+        if (result?.value) {
+          const parsed = JSON.parse(result.value);
+          if (parsed.trips) setTrips(parsed.trips);
+          if (parsed.favs)  setFavs(parsed.favs);
+          if (parsed.db)    setDb(parsed.db);
+          if (parsed.exportedAt) setLastSaved(parsed.exportedAt);
+        }
+      } catch (e) { /* first launch */ }
+    })();
+  }, []);
+  const autoSave = (newTrips, newFavs, newDb) => {
+    clearTimeout(saveTimer.current);
+    saveTimer.current = setTimeout(async () => {
+      try {
+        const payload = { trips: newTrips, favs: newFavs, db: newDb, exportedAt: new Date().toISOString(), version: 1 };
+        localStorage.setItem("travellife-data", JSON.stringify(payload));
+        setLastSaved(new Date().toISOString());
+      } catch (e) { /* silent fail */ }
+    }, 1200);
+  };
+
+  const setTripsSync = v => { const next = typeof v === "function" ? v(trips) : v; setTrips(next); autoSave(next, favs, db); };
+  const setFavsSync  = v => { const next = typeof v === "function" ? v(favs)  : v; setFavs(next);  autoSave(trips, next, db); };
+  const setDbSync    = v => { const next = typeof v === "function" ? v(db)    : v; setDb(next);    autoSave(trips, favs, next); };
+
+  const handleImport = parsed => {
+    if (parsed.trips) setTrips(parsed.trips);
+    if (parsed.favs)  setFavs(parsed.favs);
+    if (parsed.db)    setDb(parsed.db);
+    if (parsed.exportedAt) setLastSaved(parsed.exportedAt);
+    try {
+      localStorage.setItem("travellife-data", JSON.stringify({ ...parsed, exportedAt: new Date().toISOString(), version: 1 }));
+    } catch(e) {}
+  };
+
+  return (
+    <div style={{ background:T.bg, minHeight:"100vh", fontFamily:F.sans }}>
+      <style>{GLOBAL_CSS}</style>
+
+      <GlobalScanModal open={showScan} onClose={()=>setShowScan(false)} trips={trips} setTrips={setTripsSync}/>
+      <SyncPanel open={showSync} onClose={()=>setShowSync(false)} trips={trips} favs={favs} db={db} onImport={handleImport}/>
+
+      {/* ── Masthead ── */}
+      <header style={{ background:T.surface, borderBottom:`1px solid ${T.border}`, position:"sticky", top:0, zIndex:500, boxShadow:"0 1px 0 rgba(26,14,20,0.06)" }}>
+        <div style={{ maxWidth:680, margin:"0 auto", padding:"0 16px", display:"flex", alignItems:"stretch", height:58 }}>
+          <div style={{ display:"flex", alignItems:"center", gap:10, flex:1 }}>
+            <div style={{ width:32, height:32, background:T.ink, borderRadius:8, display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
+              <Ico d={D.plane} size={15} color={T.white} fill="none"/>
+            </div>
+            <div>
+              <div style={{ fontFamily:F.serif, fontSize:18, fontWeight:700, fontStyle:"italic", color:T.ink, letterSpacing:"-0.01em", lineHeight:1 }}>Travel Life</div>
+              <div style={{ fontFamily:F.sans, fontSize:9, color:T.inkFaint, letterSpacing:"0.14em", textTransform:"uppercase", marginTop:1 }}>
+                {lastSaved ? `已儲存 ${new Date(lastSaved).toLocaleTimeString("zh-TW",{hour:"2-digit",minute:"2-digit"})}` : "Journey Journal"}
+              </div>
+            </div>
+          </div>
+          {/* Header right: sync + record */}
+          <div style={{ display:"flex", alignItems:"center", gap:8 }}>
+            <button onClick={()=>setShowSync(true)} style={{ background:T.bgDeep, border:`1px solid ${T.border}`, borderRadius:10, padding:"7px 12px", color:T.inkMid, cursor:"pointer", display:"flex", alignItems:"center", gap:5, fontSize:12, fontWeight:600, fontFamily:F.sans }}>
+              ☁ 同步
+            </button>
+            <button onClick={()=>setShowScan(true)} style={{ background:`linear-gradient(135deg,${T.rose},${T.roseDark})`, border:"none", borderRadius:10, padding:"7px 14px", color:T.white, cursor:"pointer", display:"flex", alignItems:"center", gap:6, fontSize:12.5, fontWeight:700, fontFamily:F.sans, boxShadow:Sh.rose }}>
+              <Ico d={D.camera} size={14} color={T.white}/> 記帳
+            </button>
+          </div>
+        </div>
+      </header>
+
+      {/* Content */}
+      <main style={{ maxWidth:680, margin:"0 auto", padding:"24px 16px 110px" }}>
+        {activeTrip && trip ? (
+          <TripDetail trip={trip} setTrips={setTripsSync} onBack={()=>setActiveTrip(null)}/>
+        ) : (
+          <>
+            {tab==="overview" && <OverviewTab trips={trips} setTrips={setTripsSync} setActiveTrip={setActiveTrip} onScan={()=>setShowScan(true)}/>}
+            {tab==="favs"     && <FavoritesTab favs={favs} setFavs={setFavsSync}/>}
+            {tab==="db"       && <DatabaseTab db={db} setDb={setDbSync}/>}
+            {tab==="year"     && <YearReview trips={trips}/>}
+          </>
+        )}
+      </main>
+
+      {/* Bottom nav with center FAB */}
+      {!activeTrip && (
+        <nav style={{ position:"fixed", bottom:0, left:0, right:0,
+          background:"rgba(250,246,242,0.96)", backdropFilter:"blur(20px)",
+          borderTop:`1px solid ${T.border}`, zIndex:499,
+          paddingBottom:"env(safe-area-inset-bottom,6px)" }}>
+          <div style={{ display:"flex", maxWidth:680, margin:"0 auto", alignItems:"center" }}>
+            {/* Left 2 tabs */}
+            {NAV.slice(0,2).map(n=>{
+              const act = tab===n.id;
+              return (
+                <button key={n.id} onClick={()=>setTab(n.id)} style={{
+                  flex:1, display:"flex", flexDirection:"column", alignItems:"center", gap:4,
+                  background:"none", border:"none", cursor:"pointer", padding:"10px 0 8px", fontFamily:F.sans,
+                  borderTop:`2px solid ${act?T.rose:"transparent"}`, transition:"all 0.18s" }}>
+                  <Ico d={n.icon} size={18} color={act?T.rose:T.inkFaint} sw={act?2:1.5}/>
+                  <span style={{ fontSize:10, fontWeight:act?800:500, color:act?T.rose:T.inkFaint }}>{n.label}</span>
+                </button>
+              );
+            })}
+
+            {/* Centre FAB — scan & record */}
+            <div style={{ flex:"0 0 72px", display:"flex", justifyContent:"center", alignItems:"center", padding:"4px 0 8px", position:"relative" }}>
+              <button onClick={()=>setShowScan(true)} style={{
+                width:54, height:54, borderRadius:"50%",
+                background:`linear-gradient(145deg,${T.rose},${T.roseDark})`,
+                border:`3px solid ${T.bg}`, cursor:"pointer",
+                display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", gap:1,
+                boxShadow:`0 4px 16px rgba(194,59,110,0.45), 0 0 0 1px ${T.roseMist}`,
+                transform:"translateY(-10px)", transition:"transform 0.18s, box-shadow 0.18s" }}
+                onMouseEnter={e=>Object.assign(e.currentTarget.style,{transform:"translateY(-13px)",boxShadow:`0 8px 24px rgba(194,59,110,0.55), 0 0 0 1px ${T.roseMist}`})}
+                onMouseLeave={e=>Object.assign(e.currentTarget.style,{transform:"translateY(-10px)",boxShadow:`0 4px 16px rgba(194,59,110,0.45), 0 0 0 1px ${T.roseMist}`})}>
+                <Ico d={D.camera} size={20} color={T.white}/>
+                <span style={{ fontSize:8, fontWeight:800, color:T.white, fontFamily:F.sans, letterSpacing:"0.04em" }}>記帳</span>
+              </button>
+            </div>
+
+            {/* Right 2 tabs */}
+            {NAV.slice(2,4).map(n=>{
+              const act = tab===n.id;
+              return (
+                <button key={n.id} onClick={()=>setTab(n.id)} style={{
+                  flex:1, display:"flex", flexDirection:"column", alignItems:"center", gap:4,
+                  background:"none", border:"none", cursor:"pointer", padding:"10px 0 8px", fontFamily:F.sans,
+                  borderTop:`2px solid ${act?T.rose:"transparent"}`, transition:"all 0.18s" }}>
+                  <Ico d={n.icon} size={18} color={act?T.rose:T.inkFaint} sw={act?2:1.5}/>
+                  <span style={{ fontSize:10, fontWeight:act?800:500, color:act?T.rose:T.inkFaint }}>{n.label}</span>
+                </button>
+              );
+            })}
+          </div>
+        </nav>
+      )}
+    </div>
+  );
+}
+
+
+
+const rootEl = document.getElementById('root');
+const root = ReactDOM.createRoot(rootEl);
+root.render(React.createElement(App));
+</script>
+</body>
+</html>
